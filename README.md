@@ -82,7 +82,7 @@ ArticleFlow is a content publishing and interactive quiz platform where authors 
 - Express.js
 
 ### Database
-- PostgreSQL
+- MongoDB
 
 ### Authentication
 - JWT
