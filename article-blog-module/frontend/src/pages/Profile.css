@@ -1,0 +1,343 @@
+/* ================= PROFILE PAGE ================= */
+
+.profile-page {
+  min-height: calc(100vh - 70px);
+  background: #f8f5ef;
+  padding: 30px 7%;
+}
+
+
+/* ================= PROFILE CARD ================= */
+
+.profile-card {
+  max-width: 730px;
+  margin: 0 auto 28px;
+
+  background: #ffffff;
+  border: 1px solid #dedede;
+  border-radius: 12px;
+
+  padding: 24px;
+
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.profile-avatar {
+  width: 60px;
+  height: 60px;
+
+  border-radius: 50%;
+
+  background: #174b36;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 18px;
+  font-weight: 700;
+
+  flex-shrink: 0;
+}
+
+
+/* ================= PROFILE INFORMATION ================= */
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-info h1 {
+  margin: 0;
+
+  font-size: 20px;
+  font-weight: 700;
+
+  color: #111827;
+}
+
+.profile-info p {
+  margin: 4px 0 12px;
+
+  font-size: 12px;
+  color: #777;
+
+  line-height: 1.5;
+}
+
+
+/* ================= STATS ================= */
+
+.profile-stats {
+  display: flex;
+  gap: 28px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat strong {
+  font-size: 16px;
+  color: #111827;
+}
+
+.stat span {
+  font-size: 9px;
+  color: #777;
+  margin-top: 2px;
+}
+
+
+/* ================= MY ARTICLES ================= */
+
+.profile-articles {
+  max-width: 730px;
+  margin: 0 auto;
+}
+
+.profile-articles h2 {
+  font-size: 14px;
+  font-weight: 700;
+
+  margin: 0 0 12px;
+
+  color: #111827;
+}
+
+.profile-articles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+
+/* ================= ARTICLE CARD ================= */
+
+.profile-article-card {
+  background: #ffffff;
+
+  border: 1px solid #dedede;
+  border-radius: 10px;
+
+  padding: 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  min-height: 48px;
+}
+
+
+/* ================= ARTICLE IMAGE ================= */
+
+.profile-article-image {
+  width: 48px;
+  height: 48px;
+
+  flex-shrink: 0;
+
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.profile-article-image img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+}
+
+
+/* Fallback when backend has no image */
+
+.article-image-placeholder {
+  width: 48px;
+  height: 48px;
+
+  background: #edf1ee;
+  color: #174b36;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 18px;
+  font-weight: 600;
+}
+
+
+/* ================= ARTICLE INFORMATION ================= */
+
+.profile-article-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.article-title-row {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  min-width: 0;
+}
+
+.article-title-row h3 {
+  margin: 0;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  color: #334e7a;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* ================= STATUS ================= */
+
+.profile-status {
+  padding: 3px 7px;
+
+  border-radius: 10px;
+
+  font-size: 8px;
+
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.profile-status.published {
+  background: #e7f2ec;
+  color: #27734a;
+}
+
+.profile-status.pending {
+  background: #fff0c9;
+  color: #a66b00;
+}
+
+.profile-status.draft {
+  background: #eee9e3;
+  color: #777;
+}
+
+.profile-status.rejected {
+  background: #fde8e8;
+  color: #b42318;
+}
+
+.profile-status.changes {
+  background: #fff4cc;
+  color: #a66b00;
+}
+
+
+/* ================= ARTICLE META ================= */
+
+.profile-article-meta {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  margin-top: 5px;
+
+  color: #888;
+
+  font-size: 9px;
+
+  white-space: nowrap;
+}
+
+
+/* ================= ICON AREA ================= */
+
+.profile-article-action {
+  width: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+}
+
+.article-icon {
+  border: none;
+  background: transparent;
+
+  color: #777;
+
+  width: 24px;
+  height: 24px;
+
+  padding: 3px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.article-icon:hover {
+  color: #174b36;
+}
+
+.edit-icon:hover {
+  color: #174b36;
+}
+
+
+/* ================= EMPTY / LOADING ================= */
+
+.profile-message {
+  color: #777;
+
+  font-size: 13px;
+
+  text-align: center;
+
+  padding: 30px 0;
+}
+
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+
+  .profile-page {
+    padding: 20px;
+  }
+
+  .profile-card {
+    align-items: flex-start;
+  }
+
+  .profile-stats {
+    gap: 15px;
+  }
+
+  .article-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .profile-article-meta {
+    flex-wrap: wrap;
+  }
+
+}
