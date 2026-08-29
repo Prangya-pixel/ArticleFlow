@@ -82,7 +82,7 @@ ArticleFlow is a content publishing and interactive quiz platform where authors 
 - Express.js
 
 ### Database
-- PostgreSQL
+- MongoDB Atlas
 
 ### Authentication
 - JWT
@@ -100,3 +100,19 @@ ArticleFlow/
 │   └── package.json
 │
 └── README.md
+
+## Getting started
+
+1. Copy `.env.example` to `.env` and add your MongoDB Atlas connection string and a long JWT secret.
+2. Run `npm run dev` from `backend/` to start the API.
+3. Run `npm run dev` from `frontend/` to start the web app.
+
+The frontend sends authentication requests to `/api/auth`. Vite proxies these
+requests to `http://localhost:5000` during local development. For a deployed
+frontend and backend on different domains, set `VITE_API_URL` in `frontend/.env`.
+
+### Authentication API
+
+- `POST /api/auth/register` — register a reader or author
+- `POST /api/auth/login` — sign in
+- `GET /api/auth/me` — retrieve the authenticated user with a Bearer token
