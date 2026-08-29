@@ -6,6 +6,7 @@ import MyArticles from "./pages/MyArticles";
 import Profile from "./pages/Profile";
 import ArticleView from "./pages/ArticleView";
 import Quiz from "./pages/Quiz";
+import QuizManagement from "./pages/QuizManagement";
 
 function Home() {
   return (
@@ -40,14 +41,22 @@ function App() {
         <Route path="/profile" element={<Profile />} />
 
         <Route path="/my-articles" element={<MyArticles />} />
+
         <Route
-  path="/articles/:id"
-  element={<ArticleView />}
-/>
-<Route
-  path="/articles/:id/quiz"
-  element={<Quiz />}
-/>
+          path="/articles/:id"
+          element={<ArticleView />}
+        />
+
+        <Route
+          path="/articles/:id/quiz"
+          element={<Quiz />}
+        />
+
+        {/* Quiz Management - Manya */}
+        <Route
+          path="/quiz-management"
+          element={<QuizManagement />}
+        />
       </Routes>
     </BrowserRouter>
   );

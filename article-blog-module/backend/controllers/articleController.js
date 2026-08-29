@@ -1,6 +1,5 @@
 const Article = require("../models/Article");
 
-
 // ======================================================
 // CREATE ARTICLE / SAVE AS DRAFT
 // ======================================================
@@ -18,23 +17,45 @@ const createArticle = async (req, res) => {
       image,
     } = req.body;
 
+    if (!title || !title.trim()) {
+      return res.status(400).json({
+        message: "Article title is required.",
+      });
+    }
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({
+        message: "Article content is required.",
+      });
+    }
+
+    if (!author) {
+      return res.status(400).json({
+        message: "Article author is required.",
+      });
+    }
+
     const article = new Article({
-      title,
-      content,
+      title: title.trim(),
+      content: content.trim(),
       category,
-      tags,
+      tags: Array.isArray(tags) ? tags : [],
       author,
-      quizEnabled,
-      quiz,
-      image,
+      quizEnabled: Boolean(quizEnabled),
+      quiz: quiz || { questions: [] },
+      image: image || "",
       status: "Draft",
     });
 
     const savedArticle = await article.save();
 
+    const populatedArticle = await Article.findById(
+      savedArticle._id
+    ).populate("author", "name email role");
+
     res.status(201).json({
       message: "Article saved as draft successfully",
-      article: savedArticle,
+      article: populatedArticle,
     });
   } catch (error) {
     console.error("Create article error:", error);
@@ -46,7 +67,6 @@ const createArticle = async (req, res) => {
   }
 };
 
-
 // ======================================================
 // GET ALL ARTICLES
 // ======================================================
@@ -54,7 +74,7 @@ const createArticle = async (req, res) => {
 const getAllArticles = async (req, res) => {
   try {
     const articles = await Article.find()
-      .populate("author", "name email")
+      .populate("author", "name email role")
       .sort({ createdAt: -1 });
 
     res.status(200).json(articles);
@@ -68,7 +88,6 @@ const getAllArticles = async (req, res) => {
   }
 };
 
-
 // ======================================================
 // GET SINGLE ARTICLE
 // ======================================================
@@ -76,7 +95,7 @@ const getAllArticles = async (req, res) => {
 const getArticleById = async (req, res) => {
   try {
     const article = await Article.findById(req.params.id)
-      .populate("author", "name email");
+      .populate("author", "name email role");
 
     if (!article) {
       return res.status(404).json({
@@ -94,7 +113,6 @@ const getArticleById = async (req, res) => {
     });
   }
 };
-
 
 // ======================================================
 // UPDATE EXISTING ARTICLE
@@ -133,7 +151,7 @@ const updateArticle = async (req, res) => {
         new: true,
         runValidators: true,
       }
-    );
+    ).populate("author", "name email role");
 
     if (!article) {
       return res.status(404).json({
@@ -154,7 +172,6 @@ const updateArticle = async (req, res) => {
     });
   }
 };
-
 
 // ======================================================
 // DELETE ARTICLE
@@ -185,25 +202,13 @@ const deleteArticle = async (req, res) => {
   }
 };
 
-
 // ======================================================
 // SUBMIT ARTICLE FOR REVIEW
 // ======================================================
 
 const submitArticle = async (req, res) => {
   try {
-    const article = await Article.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: {
-          status: "Pending",
-        },
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const article = await Article.findById(req.params.id);
 
     if (!article) {
       return res.status(404).json({
@@ -211,9 +216,18 @@ const submitArticle = async (req, res) => {
       });
     }
 
+    // Change article status to Pending
+    article.status = "Pending";
+
+    await article.save();
+
+    const submittedArticle = await Article.findById(
+      article._id
+    ).populate("author", "name email role");
+
     res.status(200).json({
       message: "Article submitted for review successfully",
-      article,
+      article: submittedArticle,
     });
   } catch (error) {
     console.error("Submit article error:", error);
@@ -224,7 +238,6 @@ const submitArticle = async (req, res) => {
     });
   }
 };
-
 
 module.exports = {
   createArticle,

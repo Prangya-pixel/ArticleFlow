@@ -9,132 +9,539 @@ import {
 } from "../services/articleAPI";
 import "./ArticleEditor.css";
 
+const emptyQuestion = () => ({
+  question: "",
+  options: ["", "", "", ""],
+  correctAnswer: "",
+});
+
+const categories = [
+  "Science",
+  "Technology",
+  "Health",
+  "Environment",
+  "History",
+  "Culture",
+];
+
+/*
+  BUILT-IN QUIZ DATABASE
+  No API or backend is required for quiz generation.
+*/
+
+const quizBank = {
+  science: [
+    {
+      question: "What is the basic unit of life?",
+      options: ["Cell", "Atom", "Tissue", "Organ"],
+      correctAnswer: "Cell",
+    },
+    {
+      question: "Which force keeps planets in orbit around the Sun?",
+      options: ["Gravity", "Friction", "Magnetism", "Electricity"],
+      correctAnswer: "Gravity",
+    },
+    {
+      question: "Which gas do plants mainly absorb during photosynthesis?",
+      options: ["Carbon dioxide", "Oxygen", "Nitrogen", "Hydrogen"],
+      correctAnswer: "Carbon dioxide",
+    },
+    {
+      question: "What is H2O commonly known as?",
+      options: ["Water", "Oxygen", "Hydrogen", "Salt"],
+      correctAnswer: "Water",
+    },
+    {
+      question: "Which organ pumps blood throughout the human body?",
+      options: ["Heart", "Lungs", "Brain", "Kidney"],
+      correctAnswer: "Heart",
+    },
+    {
+      question: "What is the center of an atom called?",
+      options: ["Nucleus", "Electron", "Proton", "Shell"],
+      correctAnswer: "Nucleus",
+    },
+    {
+      question: "Which planet is known as the Red Planet?",
+      options: ["Mars", "Venus", "Jupiter", "Mercury"],
+      correctAnswer: "Mars",
+    },
+    {
+      question: "What process do plants use to make food?",
+      options: [
+        "Photosynthesis",
+        "Respiration",
+        "Digestion",
+        "Fermentation",
+      ],
+      correctAnswer: "Photosynthesis",
+    },
+  ],
+
+  technology: [
+    {
+      question: "What does HTML stand for?",
+      options: [
+        "HyperText Markup Language",
+        "HighText Machine Language",
+        "Hyper Transfer Markup Language",
+        "Home Tool Markup Language",
+      ],
+      correctAnswer: "HyperText Markup Language",
+    },
+    {
+      question: "Which language is primarily used to add interactivity to web pages?",
+      options: ["JavaScript", "HTML", "CSS", "SQL"],
+      correctAnswer: "JavaScript",
+    },
+    {
+      question: "What does CSS primarily control?",
+      options: [
+        "Web page styling",
+        "Database storage",
+        "Server hardware",
+        "Network routing",
+      ],
+      correctAnswer: "Web page styling",
+    },
+    {
+      question: "Which technology is commonly used to store structured relational data?",
+      options: ["SQL", "HTML", "CSS", "JPEG"],
+      correctAnswer: "SQL",
+    },
+    {
+      question: "What is React primarily used for?",
+      options: [
+        "Building user interfaces",
+        "Managing hardware",
+        "Creating databases",
+        "Operating systems",
+      ],
+      correctAnswer: "Building user interfaces",
+    },
+    {
+      question: "Which of these is a JavaScript runtime?",
+      options: ["Node.js", "MySQL", "MongoDB", "HTML"],
+      correctAnswer: "Node.js",
+    },
+    {
+      question: "What does API stand for?",
+      options: [
+        "Application Programming Interface",
+        "Application Process Integration",
+        "Advanced Programming Internet",
+        "Automated Program Instruction",
+      ],
+      correctAnswer: "Application Programming Interface",
+    },
+    {
+      question: "Which database is a NoSQL database?",
+      options: ["MongoDB", "MySQL", "PostgreSQL", "Oracle"],
+      correctAnswer: "MongoDB",
+    },
+  ],
+
+  health: [
+    {
+      question: "Which organ is primarily responsible for pumping blood?",
+      options: ["Heart", "Liver", "Kidney", "Lung"],
+      correctAnswer: "Heart",
+    },
+    {
+      question: "Which vitamin is commonly produced by the body through sunlight exposure?",
+      options: ["Vitamin D", "Vitamin C", "Vitamin B12", "Vitamin K"],
+      correctAnswer: "Vitamin D",
+    },
+    {
+      question: "Which nutrient is mainly responsible for building and repairing muscles?",
+      options: ["Protein", "Water", "Fiber", "Minerals"],
+      correctAnswer: "Protein",
+    },
+    {
+      question: "Which organ is primarily responsible for breathing?",
+      options: ["Lungs", "Heart", "Liver", "Stomach"],
+      correctAnswer: "Lungs",
+    },
+    {
+      question: "Why is drinking water important for the body?",
+      options: [
+        "It supports hydration",
+        "It replaces oxygen",
+        "It stops digestion",
+        "It removes all nutrients",
+      ],
+      correctAnswer: "It supports hydration",
+    },
+  ],
+
+  environment: [
+    {
+      question: "Which gas is a major contributor to global warming?",
+      options: [
+        "Carbon dioxide",
+        "Oxygen",
+        "Helium",
+        "Hydrogen",
+      ],
+      correctAnswer: "Carbon dioxide",
+    },
+    {
+      question: "What is the process of planting trees to restore forests called?",
+      options: [
+        "Reforestation",
+        "Deforestation",
+        "Urbanization",
+        "Industrialization",
+      ],
+      correctAnswer: "Reforestation",
+    },
+    {
+      question: "Which of these is a renewable energy source?",
+      options: ["Solar energy", "Coal", "Petroleum", "Natural gas"],
+      correctAnswer: "Solar energy",
+    },
+    {
+      question: "What is recycling mainly intended to reduce?",
+      options: [
+        "Waste",
+        "Sunlight",
+        "Rainfall",
+        "Oxygen",
+      ],
+      correctAnswer: "Waste",
+    },
+    {
+      question: "Which ecosystem is characterized by very little rainfall?",
+      options: ["Desert", "Rainforest", "Wetland", "Mangrove"],
+      correctAnswer: "Desert",
+    },
+  ],
+
+  history: [
+    {
+      question: "Who was the first President of the United States?",
+      options: [
+        "George Washington",
+        "Abraham Lincoln",
+        "Thomas Jefferson",
+        "John Adams",
+      ],
+      correctAnswer: "George Washington",
+    },
+    {
+      question: "Which ancient civilization built the pyramids of Giza?",
+      options: [
+        "Ancient Egyptians",
+        "Romans",
+        "Greeks",
+        "Vikings",
+      ],
+      correctAnswer: "Ancient Egyptians",
+    },
+    {
+      question: "The Industrial Revolution began in which country?",
+      options: ["Britain", "France", "India", "Spain"],
+      correctAnswer: "Britain",
+    },
+    {
+      question: "Who is widely known as the leader of India's non-violent independence movement?",
+      options: [
+        "Mahatma Gandhi",
+        "Jawaharlal Nehru",
+        "Subhas Chandra Bose",
+        "Bhagat Singh",
+      ],
+      correctAnswer: "Mahatma Gandhi",
+    },
+    {
+      question: "Which empire was centered in ancient Rome?",
+      options: [
+        "Roman Empire",
+        "Mughal Empire",
+        "Ottoman Empire",
+        "Maurya Empire",
+      ],
+      correctAnswer: "Roman Empire",
+    },
+  ],
+
+  culture: [
+    {
+      question: "Which form of art uses the human body to express ideas through movement?",
+      options: ["Dance", "Painting", "Sculpture", "Architecture"],
+      correctAnswer: "Dance",
+    },
+    {
+      question: "Which of these is traditionally associated with Indian classical music?",
+      options: ["Raga", "Opera", "Blues", "Jazz"],
+      correctAnswer: "Raga",
+    },
+    {
+      question: "Which festival is widely known as the festival of lights in India?",
+      options: ["Diwali", "Holi", "Eid", "Onam"],
+      correctAnswer: "Diwali",
+    },
+    {
+      question: "Which art form primarily involves creating images using colors and surfaces?",
+      options: ["Painting", "Dance", "Music", "Drama"],
+      correctAnswer: "Painting",
+    },
+  ],
+};
+
+/*
+  Detect topic from title, category, tags and content.
+*/
+
+const detectTopic = (title, category, tags, content) => {
+  const text = `${title} ${category} ${tags} ${content}`.toLowerCase();
+
+  const topicKeywords = {
+    technology: [
+      "technology",
+      "computer",
+      "software",
+      "programming",
+      "javascript",
+      "react",
+      "node",
+      "coding",
+      "ai",
+      "artificial intelligence",
+      "machine learning",
+      "web",
+      "internet",
+      "database",
+      "app",
+      "application",
+      "cyber",
+      "digital",
+    ],
+
+    science: [
+      "science",
+      "physics",
+      "chemistry",
+      "biology",
+      "space",
+      "planet",
+      "atom",
+      "cell",
+      "energy",
+      "experiment",
+      "research",
+      "scientific",
+      "solar",
+      "universe",
+    ],
+
+    health: [
+      "health",
+      "medicine",
+      "medical",
+      "doctor",
+      "disease",
+      "fitness",
+      "nutrition",
+      "vitamin",
+      "exercise",
+      "body",
+      "hospital",
+      "mental health",
+      "wellness",
+    ],
+
+    environment: [
+      "environment",
+      "climate",
+      "pollution",
+      "global warming",
+      "forest",
+      "nature",
+      "wildlife",
+      "recycling",
+      "renewable",
+      "sustainability",
+      "carbon",
+      "ecosystem",
+      "green energy",
+    ],
+
+    history: [
+      "history",
+      "historical",
+      "war",
+      "empire",
+      "king",
+      "queen",
+      "ancient",
+      "revolution",
+      "independence",
+      "civilization",
+      "gandhi",
+      "mughal",
+      "roman",
+    ],
+
+    culture: [
+      "culture",
+      "festival",
+      "tradition",
+      "music",
+      "dance",
+      "art",
+      "literature",
+      "religion",
+      "heritage",
+      "food",
+      "custom",
+      "society",
+    ],
+  };
+
+  let bestTopic = category.toLowerCase();
+
+  let bestScore = 0;
+
+  Object.entries(topicKeywords).forEach(([topic, keywords]) => {
+    let score = 0;
+
+    keywords.forEach((keyword) => {
+      if (text.includes(keyword)) {
+        score++;
+      }
+    });
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestTopic = topic;
+    }
+  });
+
+  if (!quizBank[bestTopic]) {
+    bestTopic = "science";
+  }
+
+  return bestTopic;
+};
+
+/*
+  Generate quiz locally from the detected topic.
+*/
+
+const generateLocalQuiz = (title, category, tags, content) => {
+  const topic = detectTopic(title, category, tags, content);
+
+  const bank = quizBank[topic] || quizBank.science;
+
+  const shuffled = [...bank].sort(() => Math.random() - 0.5);
+
+  return shuffled.slice(0, Math.min(5, shuffled.length)).map((q) => ({
+    question: q.question,
+    options: [...q.options],
+    correctAnswer: q.correctAnswer,
+  }));
+};
+
 function ArticleEditor() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [params] = useSearchParams();
 
-  // Editing article ID from /write?edit=ARTICLE_ID
-  const editId = searchParams.get("edit");
+  const editId = params.get("edit");
 
   const [articleId, setArticleId] = useState(editId || null);
-
-  // Article fields
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Science");
   const [tags, setTags] = useState("");
   const [content, setContent] = useState("");
+
   const [quizEnabled, setQuizEnabled] = useState(false);
 
-  // Quiz questions
   const [quizQuestions, setQuizQuestions] = useState([
-    {
-      question: "",
-      options: ["", "", "", ""],
-      correctAnswer: "",
-    },
+    emptyQuestion(),
   ]);
 
-  // User state
   const [currentUser, setCurrentUser] = useState(null);
-  const [loadingUser, setLoadingUser] = useState(true);
 
-  // Other states
+  const [loadingUser, setLoadingUser] = useState(true);
   const [loadingArticle, setLoadingArticle] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [generatingQuiz, setGeneratingQuiz] = useState(false);
 
-  // --------------------------------------------------
-  // LOAD CURRENT USER
-  // --------------------------------------------------
+  // Load current user
   useEffect(() => {
-    const loadCurrentUser = async () => {
+    const loadUser = async () => {
       try {
-        setLoadingUser(true);
+        const saved = localStorage.getItem("currentUser");
 
-        const users = await getUsers();
-
-        if (!users || users.length === 0) {
-          throw new Error("No users found.");
-        }
-
-        // Check if Navbar/user switcher already saved a user
-        const savedUser = localStorage.getItem("currentUser");
-
-        let selectedUser = null;
-
-        if (savedUser) {
+        if (saved) {
           try {
-            const parsedUser = JSON.parse(savedUser);
+            const user = JSON.parse(saved);
 
-            selectedUser = users.find(
-              (user) =>
-                user._id === parsedUser._id ||
-                user.email === parsedUser.email
-            );
-          } catch (parseError) {
-            console.error(
-              "Invalid currentUser data:",
-              parseError
-            );
+            if (user?._id) {
+              setCurrentUser(user);
+              return;
+            }
+          } catch {
+            localStorage.removeItem("currentUser");
           }
         }
 
-        // Default to first available author
-        if (!selectedUser) {
-          selectedUser =
-            users.find((user) => user.role === "author") ||
-            users[0];
+        const response = await getUsers();
 
-          localStorage.setItem(
-            "currentUser",
-            JSON.stringify(selectedUser)
-          );
-        } else {
-          localStorage.setItem(
-            "currentUser",
-            JSON.stringify(selectedUser)
-          );
+        const users = Array.isArray(response)
+          ? response
+          : response?.users || [];
+
+        if (!users.length) {
+          throw new Error("No users found.");
         }
 
-        setCurrentUser(selectedUser);
-      } catch (error) {
-        console.error(
-          "Failed to load current user:",
-          error
+        const user =
+          users.find((u) => u.role === "author") || users[0];
+
+        if (!user?._id) {
+          throw new Error("No valid user found.");
+        }
+
+        localStorage.setItem(
+          "currentUser",
+          JSON.stringify(user)
         );
 
+        setCurrentUser(user);
+      } catch (error) {
+        console.error(error);
+
         alert(
-          "Unable to load the current user. Please make sure the backend is running."
+          error.response?.data?.message ||
+            "Unable to load the current user. Please make sure the backend is running."
         );
       } finally {
         setLoadingUser(false);
       }
     };
 
-    loadCurrentUser();
+    loadUser();
   }, []);
 
-  // --------------------------------------------------
-  // LOAD EXISTING ARTICLE WHEN EDITING
-  // --------------------------------------------------
+  // Load article when editing
   useEffect(() => {
-    if (!editId) {
-      return;
-    }
+    if (!editId) return;
 
     const loadArticle = async () => {
       try {
         setLoadingArticle(true);
 
-        const data = await getArticleById(editId);
-        const article = data.article || data;
+        const response = await getArticleById(editId);
 
-        setArticleId(article._id);
+        const article = response?.article || response;
+
+        setArticleId(article._id || editId);
 
         setTitle(article.title || "");
 
-        setCategory(
-          article.category || "Science"
-        );
+        setCategory(article.category || "Science");
 
         setTags(
           Array.isArray(article.tags)
@@ -144,33 +551,25 @@ function ArticleEditor() {
 
         setContent(article.content || "");
 
-        setQuizEnabled(
-          Boolean(article.quizEnabled)
-        );
+        setQuizEnabled(Boolean(article.quizEnabled));
 
-        if (
-          article.quiz &&
-          Array.isArray(article.quiz.questions) &&
-          article.quiz.questions.length > 0
-        ) {
-          setQuizQuestions(
-            article.quiz.questions.map((question) => ({
-              question: question.question || "",
-              options:
-                Array.isArray(question.options) &&
-                question.options.length === 4
-                  ? question.options
-                  : ["", "", "", ""],
-              correctAnswer:
-                question.correctAnswer || "",
-            }))
-          );
-        }
-      } catch (error) {
-        console.error(
-          "Failed to load article:",
-          error
+        const questions = article.quiz?.questions;
+
+        setQuizQuestions(
+          Array.isArray(questions) && questions.length
+            ? questions.map((q) => ({
+                question: q.question || "",
+                options:
+                  Array.isArray(q.options) &&
+                  q.options.length === 4
+                    ? [...q.options]
+                    : ["", "", "", ""],
+                correctAnswer: q.correctAnswer || "",
+              }))
+            : [emptyQuestion()]
         );
+      } catch (error) {
+        console.error(error);
 
         alert(
           error.response?.data?.message ||
@@ -186,9 +585,57 @@ function ArticleEditor() {
     loadArticle();
   }, [editId, navigate]);
 
-  // --------------------------------------------------
-  // VALIDATE ARTICLE
-  // --------------------------------------------------
+  /*
+    AUTOMATIC QUIZ GENERATION
+  */
+
+  const handleGenerateQuiz = () => {
+    if (!title.trim()) {
+      alert("Please enter the article title first.");
+      return;
+    }
+
+    if (!content.trim()) {
+      alert("Please enter the article content first.");
+      return;
+    }
+
+    try {
+      setGeneratingQuiz(true);
+
+      // Small delay so the user can see the generating state
+      setTimeout(() => {
+        const generatedQuestions = generateLocalQuiz(
+          title,
+          category,
+          tags,
+          content
+        );
+
+        if (!generatedQuestions.length) {
+          alert("Unable to generate quiz questions.");
+          setGeneratingQuiz(false);
+          return;
+        }
+
+        setQuizQuestions(generatedQuestions);
+
+        setQuizEnabled(true);
+
+        setGeneratingQuiz(false);
+
+        alert("Quiz generated successfully!");
+      }, 700);
+    } catch (error) {
+      console.error("Quiz generation error:", error);
+
+      setGeneratingQuiz(false);
+
+      alert("Failed to generate quiz.");
+    }
+  };
+
+  // Validate article
   const validateArticle = () => {
     if (!currentUser?._id) {
       alert("Please select a valid author first.");
@@ -196,9 +643,7 @@ function ArticleEditor() {
     }
 
     if (currentUser.role !== "author") {
-      alert(
-        "Only an author can create or submit an article."
-      );
+      alert("Only an author can create or submit an article.");
       return false;
     }
 
@@ -212,264 +657,240 @@ function ArticleEditor() {
       return false;
     }
 
-    // Quiz validation
-    if (quizEnabled) {
-      if (quizQuestions.length === 0) {
-        alert("Please add at least one quiz question.");
+    if (!quizEnabled) {
+      return true;
+    }
+
+    if (!quizQuestions.length) {
+      alert("Please add at least one quiz question.");
+      return false;
+    }
+
+    for (let i = 0; i < quizQuestions.length; i++) {
+      const q = quizQuestions[i];
+      const n = i + 1;
+
+      if (!q.question.trim()) {
+        alert(`Please enter Question ${n}.`);
         return false;
       }
 
-      for (
-        let i = 0;
-        i < quizQuestions.length;
-        i++
+      if (q.question.trim().length < 5) {
+        alert(
+          `Question ${n} must contain at least 5 characters.`
+        );
+        return false;
+      }
+
+      if (
+        !Array.isArray(q.options) ||
+        q.options.length !== 4
       ) {
-        const question = quizQuestions[i];
+        alert(
+          `Question ${n} must have exactly 4 options.`
+        );
+        return false;
+      }
 
-        if (!question.question.trim()) {
-          alert(
-            `Please enter Question ${i + 1}.`
-          );
-          return false;
-        }
+      const options = q.options.map((o) => o.trim());
 
-        if (
-          !Array.isArray(question.options) ||
-          question.options.length !== 4
-        ) {
-          alert(
-            `Question ${i + 1} must have exactly 4 options.`
-          );
-          return false;
-        }
+      const normalized = options.map((o) =>
+        o.toLowerCase()
+      );
 
-        if (
-          question.options.some(
-            (option) => !option.trim()
-          )
-        ) {
-          alert(
-            `Please fill all 4 options for Question ${i + 1}.`
-          );
-          return false;
-        }
+      if (options.some((o) => !o)) {
+        alert(
+          `Please fill all 4 options for Question ${n}.`
+        );
+        return false;
+      }
 
-        if (!question.correctAnswer.trim()) {
-          alert(
-            `Please select the correct answer for Question ${i + 1}.`
-          );
-          return false;
-        }
+      if (new Set(normalized).size !== 4) {
+        alert(
+          `Question ${n} cannot contain duplicate options.`
+        );
+        return false;
+      }
+
+      if (!q.correctAnswer.trim()) {
+        alert(
+          `Please select the correct answer for Question ${n}.`
+        );
+        return false;
+      }
+
+      if (
+        !normalized.includes(
+          q.correctAnswer.trim().toLowerCase()
+        )
+      ) {
+        alert(
+          `Correct answer for Question ${n} must match an option.`
+        );
+        return false;
       }
     }
 
     return true;
   };
 
-  // --------------------------------------------------
-  // PREPARE ARTICLE DATA
-  // --------------------------------------------------
-  const getArticleData = () => {
-    return {
-      title: title.trim(),
+  // Prepare article data
+  const getArticleData = () => ({
+    title: title.trim(),
 
-      content: content.trim(),
+    content: content.trim(),
 
-      category: category.trim(),
+    category: category.trim(),
 
-      tags: tags
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0),
+    tags: tags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean),
 
-      // Current logged-in/selected author
-      author: currentUser?._id,
+    author: currentUser?._id,
 
-      quizEnabled,
+    quizEnabled,
 
-      quiz: quizEnabled
-        ? {
-            questions: quizQuestions.map(
-              (question) => ({
-                question: question.question.trim(),
+    quiz: {
+      questions: quizEnabled
+        ? quizQuestions.map((q) => ({
+            question: q.question.trim(),
 
-                options: question.options.map(
-                  (option) => option.trim()
-                ),
-
-                correctAnswer:
-                  question.correctAnswer.trim(),
-              })
+            options: q.options.map((o) =>
+              o.trim()
             ),
-          }
-        : {
-            questions: [],
-          },
-    };
-  };
 
-  // --------------------------------------------------
-  // UPDATE QUIZ QUESTION TEXT
-  // --------------------------------------------------
-  const updateQuestionText = (
-    questionIndex,
-    value
-  ) => {
-    setQuizQuestions(
-      (previousQuestions) =>
-        previousQuestions.map(
-          (question, index) =>
-            index === questionIndex
-              ? {
-                  ...question,
-                  question: value,
-                }
-              : question
-        )
-    );
-  };
+            correctAnswer:
+              q.correctAnswer.trim(),
+          }))
+        : [],
+    },
+  });
 
-  // --------------------------------------------------
-  // UPDATE QUIZ OPTION
-  // --------------------------------------------------
-  const updateOption = (
-    questionIndex,
-    optionIndex,
-    value
-  ) => {
-    setQuizQuestions(
-      (previousQuestions) =>
-        previousQuestions.map(
-          (question, index) => {
-            if (index !== questionIndex) {
-              return question;
+  // Update question
+  const updateQuestion = (qi, value) => {
+    setQuizQuestions((prev) =>
+      prev.map((q, i) =>
+        i === qi
+          ? {
+              ...q,
+              question: value,
             }
-
-            const updatedOptions = [
-              ...question.options,
-            ];
-
-            updatedOptions[optionIndex] = value;
-
-            return {
-              ...question,
-              options: updatedOptions,
-            };
-          }
-        )
+          : q
+      )
     );
   };
 
-  // --------------------------------------------------
-  // UPDATE CORRECT ANSWER
-  // --------------------------------------------------
-  const updateCorrectAnswer = (
-    questionIndex,
-    value
-  ) => {
-    setQuizQuestions(
-      (previousQuestions) =>
-        previousQuestions.map(
-          (question, index) =>
-            index === questionIndex
-              ? {
-                  ...question,
-                  correctAnswer: value,
-                }
-              : question
-        )
+  // Update option
+  const updateOption = (qi, oi, value) => {
+    setQuizQuestions((prev) =>
+      prev.map((q, i) => {
+        if (i !== qi) return q;
+
+        const options = [...q.options];
+
+        const oldValue = options[oi];
+
+        options[oi] = value;
+
+        return {
+          ...q,
+          options,
+
+          correctAnswer:
+            q.correctAnswer === oldValue
+              ? ""
+              : q.correctAnswer,
+        };
+      })
     );
   };
 
-  // --------------------------------------------------
-  // ADD QUESTION
-  // --------------------------------------------------
+  // Update correct answer
+  const updateAnswer = (qi, value) => {
+    setQuizQuestions((prev) =>
+      prev.map((q, i) =>
+        i === qi
+          ? {
+              ...q,
+              correctAnswer: value,
+            }
+          : q
+      )
+    );
+  };
+
+  // Add question
   const addQuestion = () => {
-    setQuizQuestions(
-      (previousQuestions) => [
-        ...previousQuestions,
-
-        {
-          question: "",
-          options: ["", "", "", ""],
-          correctAnswer: "",
-        },
-      ]
-    );
+    setQuizQuestions((prev) => [
+      ...prev,
+      emptyQuestion(),
+    ]);
   };
 
-  // --------------------------------------------------
-  // REMOVE QUESTION
-  // --------------------------------------------------
-  const removeQuestion = (
-    questionIndex
-  ) => {
+  // Remove question
+  const removeQuestion = (qi) => {
     if (quizQuestions.length === 1) {
+      alert(
+        "Quiz must contain at least one question."
+      );
       return;
     }
 
-    setQuizQuestions(
-      (previousQuestions) =>
-        previousQuestions.filter(
-          (_, index) =>
-            index !== questionIndex
-        )
+    setQuizQuestions((prev) =>
+      prev.filter((_, i) => i !== qi)
     );
   };
 
-  // --------------------------------------------------
-  // SAVE DRAFT
-  // --------------------------------------------------
+  // Toggle quiz
+  const toggleQuiz = () => {
+    setQuizEnabled((prev) => {
+      const next = !prev;
+
+      if (next && !quizQuestions.length) {
+        setQuizQuestions([emptyQuestion()]);
+      }
+
+      return next;
+    });
+  };
+
+  // Save draft
   const handleSaveDraft = async () => {
-    if (!validateArticle()) {
-      return;
-    }
+    if (!validateArticle()) return;
 
     try {
       setSaving(true);
 
-      const articleData =
-        getArticleData();
+      const data = getArticleData();
 
-      // Existing article
       if (articleId) {
-        await updateArticle(
-          articleId,
-          articleData
-        );
+        await updateArticle(articleId, data);
 
-        alert(
-          "Draft updated successfully!"
-        );
-      }
-
-      // New article
-      else {
+        alert("Draft updated successfully!");
+      } else {
         const response =
-          await createArticle(
-            articleData
+          await createArticle(data);
+
+        const article =
+          response?.article || response;
+
+        if (!article?._id) {
+          throw new Error(
+            "Article ID was not returned."
           );
+        }
 
-        const savedArticle =
-          response.article ||
-          response;
+        setArticleId(article._id);
 
-        setArticleId(
-          savedArticle._id
-        );
-
-        alert(
-          "Draft saved successfully!"
-        );
+        alert("Draft saved successfully!");
       }
     } catch (error) {
-      console.error(
-        "Save draft error:",
-        error
-      );
+      console.error(error);
 
       alert(
         error.response?.data?.message ||
+          error.message ||
           "Failed to save draft."
       );
     } finally {
@@ -477,49 +898,38 @@ function ArticleEditor() {
     }
   };
 
-  // --------------------------------------------------
-  // SUBMIT FOR REVIEW
-  // --------------------------------------------------
+  // Submit article
   const handleSubmit = async () => {
-    if (!validateArticle()) {
-      return;
-    }
+    if (!validateArticle()) return;
 
     try {
       setSaving(true);
 
-      const articleData =
-        getArticleData();
+      const data = getArticleData();
 
-      let currentId = articleId;
+      let id = articleId;
 
-      // Create article once if it doesn't exist
-      if (!currentId) {
+      if (!id) {
         const response =
-          await createArticle(
-            articleData
+          await createArticle(data);
+
+        const article =
+          response?.article || response;
+
+        if (!article?._id) {
+          throw new Error(
+            "Article ID was not returned."
           );
+        }
 
-        const savedArticle =
-          response.article ||
-          response;
+        id = article._id;
 
-        currentId =
-          savedArticle._id;
-
-        setArticleId(currentId);
+        setArticleId(id);
       } else {
-        // Update the same article
-        await updateArticle(
-          currentId,
-          articleData
-        );
+        await updateArticle(id, data);
       }
 
-      // Same article: Draft → Pending
-      await submitArticle(
-        currentId
-      );
+      await submitArticle(id);
 
       alert(
         "Article submitted for review!"
@@ -527,13 +937,11 @@ function ArticleEditor() {
 
       navigate("/profile");
     } catch (error) {
-      console.error(
-        "Submit article error:",
-        error
-      );
+      console.error(error);
 
       alert(
         error.response?.data?.message ||
+          error.message ||
           "Failed to submit article for review."
       );
     } finally {
@@ -541,59 +949,26 @@ function ArticleEditor() {
     }
   };
 
-  // --------------------------------------------------
-  // LOADING USER
-  // --------------------------------------------------
-  if (loadingUser) {
+  if (loadingUser || loadingArticle) {
     return (
       <div className="article-editor-page">
-
-        <div
-          style={{
-            padding: "60px",
-            textAlign: "center",
-          }}
-        >
-          Loading user...
+        <div className="loading-message">
+          {loadingUser
+            ? "Loading user..."
+            : "Loading article..."}
         </div>
-
       </div>
     );
   }
 
-  // --------------------------------------------------
-  // LOADING ARTICLE
-  // --------------------------------------------------
-  if (loadingArticle) {
-    return (
-      <div className="article-editor-page">
-
-        <div
-          style={{
-            padding: "60px",
-            textAlign: "center",
-          }}
-        >
-          Loading article...
-        </div>
-
-      </div>
-    );
-  }
-
-  // --------------------------------------------------
-  // PAGE UI
-  // --------------------------------------------------
   return (
     <div className="article-editor-page">
-
       <main className="editor-container">
 
-        {/* Heading */}
+        {/* HEADER */}
+
         <div className="editor-heading">
-
           <div>
-
             <h1>
               {editId
                 ? "Edit Article"
@@ -601,10 +976,9 @@ function ArticleEditor() {
             </h1>
 
             <p>
-              Write your article and add a
-              quiz before submitting for review.
+              Write your article and add a quiz
+              before submitting for review.
             </p>
-
           </div>
 
           <button
@@ -616,98 +990,100 @@ function ArticleEditor() {
           >
             ← Cancel
           </button>
-
         </div>
 
-        {/* Title */}
-        <section className="editor-card title-card">
+        {/* TITLE */}
 
-          <label>Title</label>
+        <section className="editor-card title-card">
+          <label htmlFor="article-title">
+            Title
+          </label>
 
           <input
-            type="text"
+            id="article-title"
             value={title}
             onChange={(e) =>
               setTitle(e.target.value)
             }
             placeholder="Enter your article title..."
           />
-
         </section>
 
-        {/* Article Details */}
+        {/* ARTICLE DETAILS */}
+
         <section className="editor-card">
 
           <div className="details-row">
 
-            {/* Category */}
             <div className="field-group">
-
-              <label>Category</label>
+              <label htmlFor="article-category">
+                Category
+              </label>
 
               <select
+                id="article-category"
                 value={category}
                 onChange={(e) =>
                   setCategory(e.target.value)
                 }
               >
-                <option>Science</option>
-                <option>Technology</option>
-                <option>Health</option>
-                <option>Environment</option>
-                <option>History</option>
-                <option>Culture</option>
+                {categories.map((item) => (
+                  <option
+                    key={item}
+                    value={item}
+                  >
+                    {item}
+                  </option>
+                ))}
               </select>
-
             </div>
 
-            {/* Tags */}
             <div className="field-group">
-
-              <label>
+              <label htmlFor="article-tags">
                 Tags (comma separated)
               </label>
 
               <input
-                type="text"
+                id="article-tags"
                 value={tags}
                 onChange={(e) =>
                   setTags(e.target.value)
                 }
                 placeholder="AI, education, technology"
               />
-
             </div>
 
           </div>
 
-          {/* Content */}
           <div className="field-group content-group">
-
-            <label>Content</label>
+            <label htmlFor="article-content">
+              Content
+            </label>
 
             <textarea
+              id="article-content"
               value={content}
               onChange={(e) =>
                 setContent(e.target.value)
               }
               placeholder="Write your article here..."
             />
-
           </div>
 
         </section>
 
-        {/* Quiz Toggle */}
+        {/* QUIZ TOGGLE */}
+
         <section className="editor-card quiz-toggle-card">
 
-          <div>
+          <div className="quiz-toggle-content">
 
             <h3>Add a Quiz</h3>
 
             <p>
-              Quizzes increase reader engagement
-              significantly.
+              Automatically generate quiz
+              questions according to your
+              article topic.
             </p>
 
           </div>
@@ -718,46 +1094,66 @@ function ArticleEditor() {
                 ? "toggle-on"
                 : ""
             }`}
-            onClick={() =>
-              setQuizEnabled(
-                !quizEnabled
-              )
-            }
+            onClick={toggleQuiz}
             type="button"
+            aria-label="Toggle quiz"
+            aria-pressed={quizEnabled}
           >
-            <span></span>
+            <span />
           </button>
 
         </section>
 
-        {/* Quiz Builder */}
+        {/* QUIZ BUILDER */}
+
         {quizEnabled && (
           <section className="editor-card quiz-builder">
 
-            <h2>Quiz Builder</h2>
+            <div className="quiz-builder-header">
 
-            <p className="quiz-description">
-              Add questions that readers can
-              answer after reading your article.
-            </p>
+              <div>
+                <h2>
+                  Quiz Builder
+                </h2>
+
+                <p className="quiz-description">
+                  Generate questions automatically
+                  or edit them manually.
+                </p>
+              </div>
+
+              {/* GENERATE BUTTON */}
+
+              <button
+                type="button"
+                className="generate-quiz-button"
+                onClick={handleGenerateQuiz}
+                disabled={
+                  generatingQuiz ||
+                  !title.trim() ||
+                  !content.trim()
+                }
+              >
+                {generatingQuiz
+                  ? "Generating..."
+                  : "✨ Generate Quiz"}
+              </button>
+
+            </div>
+
+            {/* QUESTIONS */}
 
             {quizQuestions.map(
-              (
-                question,
-                questionIndex
-              ) => (
-
+              (q, qi) => (
                 <div
                   className="question-box"
-                  key={questionIndex}
+                  key={qi}
                 >
 
-                  {/* Question header */}
                   <div className="question-header">
 
                     <label>
-                      Question{" "}
-                      {questionIndex + 1}
+                      Question {qi + 1}
                     </label>
 
                     {quizQuestions.length >
@@ -766,9 +1162,7 @@ function ArticleEditor() {
                         type="button"
                         className="remove-question"
                         onClick={() =>
-                          removeQuestion(
-                            questionIndex
-                          )
+                          removeQuestion(qi)
                         }
                       >
                         Remove
@@ -777,64 +1171,51 @@ function ArticleEditor() {
 
                   </div>
 
-                  {/* Question */}
                   <input
-                    type="text"
-                    value={
-                      question.question
-                    }
+                    value={q.question}
                     onChange={(e) =>
-                      updateQuestionText(
-                        questionIndex,
+                      updateQuestion(
+                        qi,
                         e.target.value
                       )
                     }
                     placeholder="Enter your question..."
                   />
 
-                  {/* Options */}
                   <div className="options-grid">
 
-                    {question.options.map(
-                      (
-                        option,
-                        optionIndex
-                      ) => (
+                    {q.options.map(
+                      (option, oi) => (
                         <input
-                          key={optionIndex}
-                          type="text"
+                          key={oi}
                           value={option}
                           onChange={(e) =>
                             updateOption(
-                              questionIndex,
-                              optionIndex,
+                              qi,
+                              oi,
                               e.target.value
                             )
                           }
-                          placeholder={`Option ${
-                            String.fromCharCode(
-                              65 +
-                                optionIndex
-                            )
-                          }`}
+                          placeholder={`Option ${String.fromCharCode(
+                            65 + oi
+                          )}`}
                         />
                       )
                     )}
 
                   </div>
 
-                  {/* Correct answer */}
                   <label className="answer-label">
                     Correct Answer
                   </label>
 
                   <select
                     value={
-                      question.correctAnswer
+                      q.correctAnswer
                     }
                     onChange={(e) =>
-                      updateCorrectAnswer(
-                        questionIndex,
+                      updateAnswer(
+                        qi,
                         e.target.value
                       )
                     }
@@ -844,13 +1225,10 @@ function ArticleEditor() {
                       Select correct answer
                     </option>
 
-                    {question.options.map(
-                      (
-                        option,
-                        optionIndex
-                      ) => (
+                    {q.options.map(
+                      (option, oi) => (
                         <option
-                          key={optionIndex}
+                          key={oi}
                           value={option}
                           disabled={
                             !option.trim()
@@ -858,9 +1236,12 @@ function ArticleEditor() {
                         >
                           Option{" "}
                           {String.fromCharCode(
-                            65 +
-                              optionIndex
+                            65 + oi
                           )}
+
+                          {option.trim()
+                            ? ` — ${option}`
+                            : ""}
                         </option>
                       )
                     )}
@@ -871,7 +1252,8 @@ function ArticleEditor() {
               )
             )}
 
-            {/* Add question */}
+            {/* ADD QUESTION */}
+
             <button
               className="add-question"
               onClick={addQuestion}
@@ -885,86 +1267,84 @@ function ArticleEditor() {
 
       </main>
 
-      {/* Bottom Actions */}
+      {/* BOTTOM ACTIONS */}
+
       <div className="bottom-actions">
 
-        {/* Save Draft */}
-        <button
-          className="save-button"
-          onClick={handleSaveDraft}
-          disabled={
-            saving ||
-            loadingUser
-          }
-          type="button"
-        >
-          {saving
-            ? "Saving..."
-            : "Save Draft"}
-        </button>
+        <div className="bottom-actions-inner">
 
-        {/* Submit */}
-        <button
-          className="submit-button"
-          onClick={handleSubmit}
-          disabled={
-            saving ||
-            loadingUser ||
-            !title.trim() ||
-            !content.trim()
-          }
-          type="button"
-        >
-
-          {/* Share icon */}
-          <svg
-            width="17"
-            height="17"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <button
+            className="save-button"
+            onClick={handleSaveDraft}
+            disabled={saving}
+            type="button"
           >
-            <circle
-              cx="18"
-              cy="5"
-              r="3"
-            />
+            {saving
+              ? "Saving..."
+              : "Save Draft"}
+          </button>
 
-            <circle
-              cx="6"
-              cy="12"
-              r="3"
-            />
+          <button
+            className="submit-button"
+            onClick={handleSubmit}
+            disabled={
+              saving ||
+              !title.trim() ||
+              !content.trim()
+            }
+            type="button"
+          >
 
-            <circle
-              cx="18"
-              cy="19"
-              r="3"
-            />
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle
+                cx="18"
+                cy="5"
+                r="3"
+              />
 
-            <line
-              x1="8.6"
-              y1="10.7"
-              x2="15.4"
-              y2="6.3"
-            />
+              <circle
+                cx="6"
+                cy="12"
+                r="3"
+              />
 
-            <line
-              x1="8.6"
-              y1="13.3"
-              x2="15.4"
-              y2="17.7"
-            />
-          </svg>
+              <circle
+                cx="18"
+                cy="19"
+                r="3"
+              />
 
-          {saving
-            ? "Submitting..."
-            : "Submit for Review"}
+              <line
+                x1="8.6"
+                y1="10.7"
+                x2="15.4"
+                y2="6.3"
+              />
 
-        </button>
+              <line
+                x1="8.6"
+                y1="13.3"
+                x2="15.4"
+                y2="17.7"
+              />
+            </svg>
+
+            {saving
+              ? "Submitting..."
+              : "Submit for Review"}
+
+          </button>
+
+        </div>
 
       </div>
 
@@ -973,3 +1353,4 @@ function ArticleEditor() {
 }
 
 export default ArticleEditor;
+
