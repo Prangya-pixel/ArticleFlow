@@ -1,39 +1,65 @@
 const dns = require("dns");
+
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
-const articleRoutes = require("./routes/articleRoutes");
+require("dotenv").config();
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+
+const articleRoutes = require("./routes/articleRoutes");
+const quizRoutes = require("./routes/quizRoutes");
 const userRoutes = require("./routes/userRoutes");
-require("dotenv").config();
 
 require("./models/User");
+require("./models/Article");
+
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
+
+// IMPORTANT:
+// Quiz routes must come BEFORE article routes
+// so /generate-quiz is not treated as /:id.
+app.use("/api", quizRoutes);
+
 app.use("/api/articles", articleRoutes);
 app.use("/api/users", userRoutes);
 
-// MongoDB connection
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB connected successfully");
-  })
-  .catch((error) => {
-    console.error("MongoDB connection failed:", error.message);
-  });
-
-// Test route
 app.get("/", (req, res) => {
-  res.send("Content Management System Backend is running");
+  res.json({
+    message: "Content Management System Backend is running",
+  });
 });
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("MongoDB connected successfully");
+
+    const server = app.listen(PORT, "127.0.0.1", () => {
+      console.log(
+        `Server running on http://127.0.0.1:${PORT}`
+      );
+      console.log(
+        "Backend is ready. Keep this terminal running."
+      );
+    });
+
+    server.on("error", (error) => {
+      console.error(
+        "Server failed to start:",
+        error.message
+      );
+    });
+  })
+  .catch((error) => {
+    console.error(
+      "MongoDB connection failed:",
+      error.message
+    );
+  });
