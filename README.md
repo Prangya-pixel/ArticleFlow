@@ -83,6 +83,7 @@ ArticleFlow is a content publishing and interactive quiz platform where authors 
 
 ### Database
 - MongoDB Atlas
+- MongoDB
 
 ### Authentication
 - JWT
@@ -116,3 +117,4 @@ frontend and backend on different domains, set `VITE_API_URL` in `frontend/.env`
 - `POST /api/auth/register` — register a reader or author
 - `POST /api/auth/login` — sign in
 - `GET /api/auth/me` — retrieve the authenticated user with a Bearer token
+└── README.md
