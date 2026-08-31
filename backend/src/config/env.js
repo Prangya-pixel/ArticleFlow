@@ -4,4 +4,4 @@ import { fileURLToPath } from 'node:url';
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 // This is the project root, so `npm run dev` always reads ArticleFlow/.env.
-dotenv.config({ path: resolve(currentDirectory, '../../.env') });
+dotenv.config({ path: resolve(currentDirectory, '../../../.env') });
