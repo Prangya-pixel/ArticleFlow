@@ -1,1 +1,1 @@
-// TODO: Authentication module implementation
+export { default as AuthenticationModule } from './AuthenticationModule'
