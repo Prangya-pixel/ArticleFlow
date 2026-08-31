@@ -14,3 +14,20 @@ export async function requireAuth(req, res, next) {
 }
 
 export const allowRoles = (...roles) => (req, res, next) => roles.includes(req.user.role) ? next() : res.status(403).json({ message: 'You do not have permission to perform this action.' });
+
+export async function optionalAuth(req, res, next) {
+  try {
+    const token = req.headers.authorization?.startsWith('Bearer ') && req.headers.authorization.slice(7);
+    if (token) {
+      const payload = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(payload.sub);
+      if (user) {
+        req.user = user;
+      }
+    }
+  } catch {
+    // Ignore verification errors for optional auth
+  }
+  return next();
+}
+

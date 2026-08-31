@@ -14,6 +14,7 @@ import AdminProfile from './pages/admin/AdminProfile'
 import ReaderHome from './pages/reader/ReaderHome'
 import ReaderBrowse from './pages/reader/ReaderBrowse'
 import ReaderProfile from './pages/reader/ReaderProfile'
+import ArticleDetail from './pages/ArticleDetail'
 import NotFound from './pages/NotFound'
 
 export default function App() {
@@ -26,6 +27,7 @@ export default function App() {
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<AuthorHome />} />
         <Route path="browse" element={<AuthorBrowse />} />
+        <Route path="article/:id" element={<ArticleDetail />} />
         <Route path="create" element={<CreateArticle />} />
         <Route path="profile" element={<AuthorProfile />} />
       </Route>
@@ -34,6 +36,7 @@ export default function App() {
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<AdminHome />} />
         <Route path="browse" element={<AdminBrowse />} />
+        <Route path="article/:id" element={<ArticleDetail />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="profile" element={<AdminProfile />} />
       </Route>
@@ -42,6 +45,7 @@ export default function App() {
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<ReaderHome />} />
         <Route path="browse" element={<ReaderBrowse />} />
+        <Route path="article/:id" element={<ArticleDetail />} />
         <Route path="profile" element={<ReaderProfile />} />
       </Route>
 
@@ -49,3 +53,4 @@ export default function App() {
     </Routes>
   )
 }
+
