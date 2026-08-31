@@ -4,7 +4,7 @@ import './authentication.css';
 
 const blankForm = { name: '', email: '', password: '', role: 'reader' };
 
-export default function AuthenticationModule() {
+export default function AuthenticationModule({ onLogin }) {
   const [mode, setMode] = useState('login');
   const [form, setForm] = useState(blankForm);
   const [user, setUser] = useState(null);
@@ -15,7 +15,11 @@ export default function AuthenticationModule() {
   useEffect(() => {
     const token = localStorage.getItem('articleflow_token');
     if (!token) return;
-    authRequest('me', null, token).then(({ user: savedUser }) => setUser(savedUser)).catch(() => localStorage.removeItem('articleflow_token'));
+    authRequest('me', null, token)
+  .then(({ user: savedUser }) => {
+    setUser(savedUser);
+    onLogin?.(savedUser);
+  }).catch(() => localStorage.removeItem('articleflow_token'));
   }, []);
 
   const update = (event) => setForm({ ...form, [event.target.name]: event.target.value });
@@ -25,7 +29,10 @@ export default function AuthenticationModule() {
     event.preventDefault(); setMessage(''); setBusy(true);
     try {
       const data = isRegister ? await authRequest('register', form) : await authRequest('login', { email: form.email, password: form.password });
-      localStorage.setItem('articleflow_token', data.token); setUser(data.user); setForm(blankForm);
+      localStorage.setItem('articleflow_token', data.token);
+      setUser(data.user);
+      onLogin?.(data.user);
+      setForm(blankForm);
     } catch (error) { setMessage(error.message); } finally { setBusy(false); }
   };
 
