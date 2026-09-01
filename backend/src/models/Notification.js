@@ -14,7 +14,7 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['APPROVED', 'REJECTED', 'CHANGES_REQUESTED'],
+      enum: ['APPROVED', 'REJECTED', 'CHANGES_REQUESTED', 'SUBMITTED', 'PUBLISHED'],
       required: true
     },
     message: {

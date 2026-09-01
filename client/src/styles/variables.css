@@ -8,3 +8,14 @@
   --line: #dce6e0;
   --white: #fff;
 }
+
+:root[data-theme='dark'] {
+  --ink: #e5efe8;
+  --muted: #a5b7ac;
+  --green: #61aa8b;
+  --green-dark: #b9e5ce;
+  --mint: #18382e;
+  --paper: #0f1915;
+  --line: #294238;
+  --white: #16231d;
+}

@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link, useLocation } from 'react-router-dom'
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom'
 import { articleService } from '../services/articleService'
 import { quizService } from '../services/quizService'
 import { QuizPlayer } from '../modules/quiz'
 import Loading from '../components/common/Loading'
+import AdminQuizEditor from '../components/quiz/AdminQuizEditor'
 
 export default function ArticleDetail() {
   const { id } = useParams()
   const location = useLocation()
+  const navigate = useNavigate()
   const [article, setArticle] = useState(null)
   const [hasQuiz, setHasQuiz] = useState(false)
+  const [quiz, setQuiz] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -31,6 +34,7 @@ export default function ArticleDetail() {
         if (active) {
           setArticle(articleData)
           setHasQuiz(!!quizData)
+          setQuiz(quizData)
           setLoading(false)
         }
       })
@@ -62,6 +66,11 @@ export default function ArticleDetail() {
   }
 
   const { title, excerpt, body, category, author, readMinutes, views, coverImage, publishedAt } = article
+  const canManage = rolePrefix === 'author' && article.status !== 'Pending'
+  async function deleteArticle() {
+    if (!window.confirm('Delete this article and its quiz? This cannot be undone.')) return
+    try { await articleService.deleteArticle(id); navigate('/author/browse', { replace: true }) } catch (err) { setError(err.message) }
+  }
 
   return (
     <article className="article-detail-container">
@@ -85,6 +94,7 @@ export default function ArticleDetail() {
           <span className="meta-dot">&middot;</span>
           <span className="meta-views">👁 {views} views</span>
         </div>
+        {rolePrefix === 'author' && <div className="author-article-actions">{canManage ? <><Link className="editor-secondary-button" to={`/author/edit/${id}`}>Edit article</Link><button className="article-delete-button" type="button" onClick={deleteArticle}>Delete article</button></> : <p className="quiz-attached-note">This article is under review and cannot be changed right now.</p>}</div>}
       </header>
 
       {coverImage && (
@@ -99,12 +109,14 @@ export default function ArticleDetail() {
         ))}
       </section>
 
-      {hasQuiz && (
+      {hasQuiz && rolePrefix === 'reader' && (
         <section className="article-detail-quiz-section">
           <div className="quiz-section-divider"></div>
           <QuizPlayer articleId={id} />
         </section>
       )}
+      {hasQuiz && rolePrefix === 'author' && <section className="article-detail-quiz-section"><p className="quiz-attached-note">This article has an attached quiz with reader scoring enabled after publication.</p></section>}
+      {rolePrefix === 'admin' && <section className="article-detail-quiz-section"><AdminQuizEditor articleId={id} quiz={quiz} onSaved={(updatedQuiz) => { setQuiz(updatedQuiz); setHasQuiz(true) }} /></section>}
     </article>
   )
 }

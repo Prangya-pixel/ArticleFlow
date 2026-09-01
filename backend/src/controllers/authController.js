@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'node:crypto';
 import User from '../models/User.js';
 import { createToken } from '../utils/token.js';
 
@@ -51,5 +52,41 @@ export async function updateProfile(req, res, next) {
     }
     await user.save();
     return res.json({ user: userResponse(user) });
+  } catch (error) { next(error); }
+}
+
+export async function requestPasswordReset(req, res, next) {
+  try {
+    const email = req.body.email?.trim().toLowerCase();
+    if (!email) return res.status(400).json({ message: 'Email address is required.' });
+    const user = await User.findOne({ email }).select('+passwordResetToken +passwordResetExpiresAt');
+    // Keep this response identical for existing and non-existing accounts.
+    const message = 'If an account exists for that email, a password-reset link has been created.';
+    if (!user) return res.json({ message });
+    const token = crypto.randomBytes(32).toString('hex');
+    user.passwordResetToken = crypto.createHash('sha256').update(token).digest('hex');
+    user.passwordResetExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    await user.save();
+    const resetLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
+    // Email transport is intentionally not assumed. This makes the flow usable
+    // in local development without exposing the token in an API response.
+    console.log(`Password reset link for ${user.email}: ${resetLink}`);
+    return res.json({ message });
+  } catch (error) { next(error); }
+}
+
+export async function resetPassword(req, res, next) {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) return res.status(400).json({ message: 'Reset token and new password are required.' });
+    if (password.length < 8) return res.status(400).json({ message: 'Password must be at least 8 characters.' });
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await User.findOne({ passwordResetToken: tokenHash, passwordResetExpiresAt: { $gt: new Date() } }).select('+password +passwordResetToken +passwordResetExpiresAt');
+    if (!user) return res.status(400).json({ message: 'This password-reset link is invalid or has expired.' });
+    user.password = await bcrypt.hash(password, 12);
+    user.passwordResetToken = undefined;
+    user.passwordResetExpiresAt = undefined;
+    await user.save();
+    return res.json({ message: 'Your password has been reset. You can now sign in.' });
   } catch (error) { next(error); }
 }

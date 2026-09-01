@@ -5,6 +5,7 @@ import Sidebar from '../common/Sidebar'
 const items = [
   { label: 'Home', to: '/reader/home' },
   { label: 'Browse', to: '/reader/browse' },
+  { label: 'Notifications', to: '/reader/notifications' },
   { label: 'Profile', to: '/reader/profile' },
 ]
 

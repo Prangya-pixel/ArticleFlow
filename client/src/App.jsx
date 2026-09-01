@@ -3,6 +3,7 @@ import AuthorLayout from './components/layout/AuthorLayout'
 import AdminLayout from './components/layout/AdminLayout'
 import ReaderLayout from './components/layout/ReaderLayout'
 import Login from './pages/auth/Login'
+import ResetPassword from './pages/auth/ResetPassword'
 import AuthorHome from './pages/author/AuthorHome'
 import AuthorBrowse from './pages/author/AuthorBrowse'
 import CreateArticle from './pages/author/CreateArticle'
@@ -24,6 +25,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       <Route element={<ProtectedRoute role="author" />}>
       <Route path="/author" element={<AuthorLayout />}>
@@ -32,8 +34,9 @@ export default function App() {
         <Route path="browse" element={<AuthorBrowse />} />
         <Route path="article/:id" element={<ArticleDetail />} />
         <Route path="create" element={<CreateArticle />} />
+        <Route path="edit/:id" element={<CreateArticle />} />
         <Route path="profile" element={<AuthorProfile />} />
-        <Route path="notifications" element={<Notifications />} />
+        <Route path="notifications" element={<Notifications role="author" />} />
       </Route>
       </Route>
 
@@ -45,6 +48,7 @@ export default function App() {
         <Route path="article/:id" element={<ArticleDetail />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="profile" element={<AdminProfile />} />
+        <Route path="notifications" element={<Notifications role="admin" />} />
       </Route>
       </Route>
 
@@ -55,6 +59,7 @@ export default function App() {
         <Route path="browse" element={<ReaderBrowse />} />
         <Route path="article/:id" element={<ArticleDetail />} />
         <Route path="profile" element={<ReaderProfile />} />
+        <Route path="notifications" element={<Notifications role="reader" />} />
       </Route>
       </Route>
 

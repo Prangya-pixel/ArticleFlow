@@ -5,4 +5,5 @@ export const quizService = {
     try { return await api(`/quizzes/article/${articleId}`) } catch (error) { if (error.message === 'Quiz not found.') return null; throw error }
   },
   submitAttempt: (articleId, answers) => api(`/quizzes/article/${articleId}/attempts`, { method: 'POST', body: JSON.stringify({ answers }) }),
+  updateQuiz: (articleId, questions) => api(`/quizzes/article/${articleId}`, { method: 'PATCH', body: JSON.stringify({ questions }) }),
 }

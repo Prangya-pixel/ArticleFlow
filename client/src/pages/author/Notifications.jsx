@@ -9,6 +9,8 @@ function notificationLabel(type) {
   if (type === 'APPROVED') return 'Article approved'
   if (type === 'REJECTED') return 'Article rejected'
   if (type === 'CHANGES_REQUESTED') return 'Changes requested'
+  if (type === 'SUBMITTED') return 'Submission received'
+  if (type === 'PUBLISHED') return 'New article published'
   return 'Notification'
 }
 
@@ -16,10 +18,19 @@ function notificationClass(type) {
   if (type === 'APPROVED') return 'notification-approved'
   if (type === 'REJECTED') return 'notification-rejected'
   if (type === 'CHANGES_REQUESTED') return 'notification-changes'
+  if (type === 'SUBMITTED') return 'notification-submitted'
+  if (type === 'PUBLISHED') return 'notification-published'
   return ''
 }
 
-export default function Notifications() {
+function notificationIcon(type) {
+  if (type === 'APPROVED' || type === 'PUBLISHED') return '✓'
+  if (type === 'REJECTED') return '×'
+  if (type === 'SUBMITTED') return '↗'
+  return '✎'
+}
+
+export default function Notifications({ role = 'author' }) {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -57,6 +68,7 @@ export default function Notifications() {
             : notification
         )
       )
+      window.dispatchEvent(new Event('articleflow:notifications-changed'))
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -76,6 +88,7 @@ export default function Notifications() {
           isRead: true,
         }))
       )
+      window.dispatchEvent(new Event('articleflow:notifications-changed'))
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -93,10 +106,10 @@ export default function Notifications() {
     <div className="notifications-page">
       <div className="notifications-header">
         <div>
-          <span className="eyebrow">Author workspace</span>
+          <span className="eyebrow">{role} workspace</span>
           <h1 className="notifications-title">Notifications.</h1>
           <p className="notifications-description">
-            Stay updated on the review status of your articles.
+            {role === 'author' ? 'Stay updated on the review status of your articles.' : role === 'admin' ? 'See newly submitted content as it arrives for review.' : 'Keep up with new stories published to ArticleFlow.'}
           </p>
         </div>
 
@@ -106,7 +119,7 @@ export default function Notifications() {
             type="button"
             onClick={handleMarkAllRead}
           >
-            Mark all as read
+            Mark all read
           </button>
         )}
       </div>
@@ -123,10 +136,10 @@ export default function Notifications() {
       {loading ? (
         <p className="loading">Loading notifications...</p>
       ) : notifications.length === 0 ? (
-        <div className="admin-empty-state">
-          <span>?</span>
-          <h2>You're all caught up.</h2>
-          <p>No notifications yet.</p>
+        <div className="notification-empty-state">
+          <span>✦</span>
+          <h2>You’re all caught up.</h2>
+          <p>{role === 'admin' ? 'New submissions will appear here.' : role === 'reader' ? 'New published stories will appear here.' : 'Article review updates will appear here.'}</p>
         </div>
       ) : (
         <div className="notification-list">
@@ -137,13 +150,7 @@ export default function Notifications() {
                 notification.isRead ? 'read' : 'unread'
               }`}
             >
-              <div className="notification-icon">
-                {notification.type === 'APPROVED'
-                  ? '?'
-                  : notification.type === 'REJECTED'
-                    ? '!'
-                    : '?'}
-              </div>
+              <div className="notification-icon">{notificationIcon(notification.type)}</div>
 
               <div className="notification-content">
                 <div className="notification-top">

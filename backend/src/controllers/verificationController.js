@@ -1,5 +1,6 @@
 import Article from '../models/Article.js'
 import Notification from '../models/Notification.js'
+import User from '../models/User.js'
 
 export async function getPendingSubmissions(req, res, next) {
   try {
@@ -32,6 +33,13 @@ export async function approveSubmission(req, res, next) {
       type: 'APPROVED',
       message: `Your article "${article.title}" has been approved.`
     })
+    const readers = await User.find({ role: 'reader' }).select('_id')
+    if (readers.length) await Notification.insertMany(readers.map(reader => ({
+      recipient: reader._id,
+      article: article._id,
+      type: 'PUBLISHED',
+      message: `A new article, "${article.title}", is now available to read.`
+    })))
 
     return res.json({
       message: 'Article approved successfully.',
