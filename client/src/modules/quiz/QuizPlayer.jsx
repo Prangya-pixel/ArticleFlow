@@ -12,6 +12,7 @@ export default function QuizPlayer({ articleId }) {
   const [answers, setAnswers] = useState({})
   const [submitting, setSubmitting] = useState(false)
   const [results, setResults] = useState(null)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     let active = true
@@ -58,10 +59,11 @@ export default function QuizPlayer({ articleId }) {
   const handleSubmit = async () => {
     setSubmitting(true)
     try {
+      setError('')
       const data = await quizService.submitAttempt(articleId, answers)
       setResults(data)
     } catch (err) {
-      console.error(err)
+      setError(err.message || 'Unable to submit the quiz.')
     } finally {
       setSubmitting(false)
     }
@@ -103,6 +105,7 @@ export default function QuizPlayer({ articleId }) {
       </div>
 
       <div className="quiz-actions">
+        {error && <p className="error">{error}</p>}
         <button
           type="button"
           className="quiz-action-button secondary"

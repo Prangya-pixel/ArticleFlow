@@ -1,2 +1,2 @@
-import PlaceholderPage from '../../components/common/PlaceholderPage'
-export default function AdminProfile() { return <PlaceholderPage eyebrow="Admin profile" title="Your profile." description="Profile settings are coming soon." /> }
+import ProfileSettings from '../../components/profile/ProfileSettings'
+export default function AdminProfile() { return <ProfileSettings title="Your admin profile." description="Manage the account you use to review and publish content." /> }

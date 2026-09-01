@@ -22,7 +22,8 @@ export async function approveSubmission(req, res, next) {
       return res.status(400).json({ message: 'Only pending articles can be approved.' })
     }
 
-    article.status = 'Approved'
+    article.status = 'Published'
+    article.publishedAt = new Date()
     await article.save()
 
     await Notification.create({

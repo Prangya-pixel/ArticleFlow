@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { createArticle, deleteArticle, getArticle, listArticles, updateArticle } from '../controllers/articleController.js';
+import { allowRoles, optionalAuth, requireAuth } from '../middleware/auth.js';
+const router = Router();
+router.get('/', optionalAuth, listArticles);
+router.get('/:id', optionalAuth, getArticle);
+router.post('/', requireAuth, allowRoles('author'), createArticle);
+router.patch('/:id', requireAuth, allowRoles('author'), updateArticle);
+router.delete('/:id', requireAuth, allowRoles('author'), deleteArticle);
+export default router;

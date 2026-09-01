@@ -47,6 +47,13 @@ h1, h2 { letter-spacing: -.045em; }
 .centered-page p:not(.eyebrow) { color: var(--muted); }
 .button { background: var(--green); border-radius: 999px; color: white; margin-top: 1rem; padding: .8rem 1.2rem; }
 .loading { color: var(--muted); padding: 2rem; text-align: center; }
+.profile-page h1 { font: clamp(2.4rem, 5vw, 4.2rem) Georgia, serif; margin: 0; }
+.profile-form { display: grid; gap: 1.25rem; margin-top: 2.5rem; max-width: 680px; }
+.profile-card { background: var(--white); border: 1px solid var(--line); border-radius: 16px; display: grid; gap: 1rem; padding: 1.5rem; }
+.profile-card h2 { font: 1.45rem Georgia, serif; margin: 0; }.profile-card p { color: var(--muted); margin: 0; }
+.profile-card label { color: var(--ink); display: grid; font-size: .85rem; font-weight: 700; gap: .45rem; }
+.profile-card input { border: 1px solid var(--line); border-radius: 8px; font: inherit; padding: .75rem; }.profile-role { text-transform: capitalize; }.profile-success { color: var(--green-dark); font-weight: 700; margin: 0; }.profile-save { border: 0; cursor: pointer; justify-self: start; }
+.home-dashboard h1 { font: clamp(2.4rem, 5vw, 4.2rem) Georgia, serif; margin: 0; }.dashboard-actions { margin: 1.75rem 0 2rem; }.dashboard-actions .button { display: inline-block; margin: 0; }.stats-grid { display: grid; gap: 1rem; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 3rem; max-width: 760px; }.stat-card { background: var(--white); border: 1px solid var(--line); border-radius: 14px; display: grid; gap: .3rem; padding: 1.25rem; }.stat-card strong { color: var(--green-dark); font: 2rem Georgia, serif; }.stat-card span { color: var(--muted); font-size: .85rem; }.dashboard-section { margin-top: 2.5rem; }.dashboard-section-heading { align-items: baseline; display: flex; justify-content: space-between; margin-bottom: 1rem; }.dashboard-section-heading h2 { font: 1.6rem Georgia, serif; margin: 0; }.dashboard-section-heading a { color: var(--green); font-size: .9rem; font-weight: 700; }.review-list { display: grid; gap: .75rem; max-width: 760px; }.review-list a { background: var(--white); border: 1px solid var(--line); border-radius: 10px; display: grid; gap: .35rem; padding: 1rem; }.review-list span { color: var(--muted); font-size: .85rem; }
 @media (max-width: 760px) {
   .navbar { flex-wrap: wrap; gap: .7rem; padding: 1rem 5vw; }
   .nav-links { margin-left: 0; order: 3; overflow-x: auto; width: 100%; }

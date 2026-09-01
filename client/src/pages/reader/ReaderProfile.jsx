@@ -1,2 +1,2 @@
-import PlaceholderPage from '../../components/common/PlaceholderPage'
-export default function ReaderProfile() { return <PlaceholderPage eyebrow="Reader profile" title="Your reading profile." description="Saved stories and result history will live here." /> }
+import ProfileSettings from '../../components/profile/ProfileSettings'
+export default function ReaderProfile() { return <ProfileSettings title="Your reader profile." description="Manage your ArticleFlow account details." /> }

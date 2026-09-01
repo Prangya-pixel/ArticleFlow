@@ -16,6 +16,8 @@ import ReaderBrowse from './pages/reader/ReaderBrowse'
 import ReaderProfile from './pages/reader/ReaderProfile'
 import ArticleDetail from './pages/ArticleDetail'
 import NotFound from './pages/NotFound'
+import Notifications from './pages/author/Notifications'
+import ProtectedRoute from './components/common/ProtectedRoute'
 
 export default function App() {
   return (
@@ -23,6 +25,7 @@ export default function App() {
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
 
+      <Route element={<ProtectedRoute role="author" />}>
       <Route path="/author" element={<AuthorLayout />}>
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<AuthorHome />} />
@@ -30,8 +33,11 @@ export default function App() {
         <Route path="article/:id" element={<ArticleDetail />} />
         <Route path="create" element={<CreateArticle />} />
         <Route path="profile" element={<AuthorProfile />} />
+        <Route path="notifications" element={<Notifications />} />
+      </Route>
       </Route>
 
+      <Route element={<ProtectedRoute role="admin" />}>
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<AdminHome />} />
@@ -40,13 +46,16 @@ export default function App() {
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="profile" element={<AdminProfile />} />
       </Route>
+      </Route>
 
+      <Route element={<ProtectedRoute role="reader" />}>
       <Route path="/reader" element={<ReaderLayout />}>
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<ReaderHome />} />
         <Route path="browse" element={<ReaderBrowse />} />
         <Route path="article/:id" element={<ArticleDetail />} />
         <Route path="profile" element={<ReaderProfile />} />
+      </Route>
       </Route>
 
       <Route path="*" element={<NotFound />} />

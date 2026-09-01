@@ -1,45 +1,7 @@
-import axios from 'axios'
+import { api } from './api'
 
-const API = axios.create({
-  baseURL: 'http://localhost:5000/api',
-})
+export const getNotifications = () => api('/notifications')
 
-function authHeaders() {
-  const token = localStorage.getItem('token')
+export const markNotificationAsRead = (id) => api(`/notifications/${id}/read`, { method: 'PATCH', body: '{}' })
 
-  return {
-    Authorization: `Bearer ${token}`,
-  }
-}
-
-export async function getNotifications() {
-  const response = await API.get('/notifications', {
-    headers: authHeaders(),
-  })
-
-  return response.data
-}
-
-export async function markNotificationAsRead(id) {
-  const response = await API.patch(
-    `/notifications/${id}/read`,
-    {},
-    {
-      headers: authHeaders(),
-    }
-  )
-
-  return response.data
-}
-
-export async function markAllNotificationsAsRead() {
-  const response = await API.patch(
-    '/notifications/read-all',
-    {},
-    {
-      headers: authHeaders(),
-    }
-  )
-
-  return response.data
-}
+export const markAllNotificationsAsRead = () => api('/notifications/read-all', { method: 'PATCH', body: '{}' })

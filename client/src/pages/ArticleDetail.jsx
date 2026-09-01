@@ -11,6 +11,7 @@ export default function ArticleDetail() {
   const [article, setArticle] = useState(null)
   const [hasQuiz, setHasQuiz] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   const rolePrefix = location.pathname.startsWith('/admin')
     ? 'admin'
@@ -36,6 +37,7 @@ export default function ArticleDetail() {
       .catch((err) => {
         console.error(err)
         if (active) {
+          setError(err.message)
           setLoading(false)
         }
       })
@@ -51,7 +53,7 @@ export default function ArticleDetail() {
     return (
       <div className="centered-page">
         <h1>Article Not Found</h1>
-        <p>The article you are looking for does not exist or has been removed.</p>
+        <p>{error || 'The article you are looking for does not exist or has been removed.'}</p>
         <Link to={`/${rolePrefix}/browse`} className="button">
           Back to Browse
         </Link>

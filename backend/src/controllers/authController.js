@@ -28,3 +28,28 @@ export async function login(req, res, next) {
 }
 
 export function me(req, res) { return res.json({ user: userResponse(req.user) }); }
+
+export async function updateProfile(req, res, next) {
+  try {
+    const { name, email, currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user._id).select('+password');
+    if (name !== undefined) {
+      if (name.trim().length < 2) return res.status(400).json({ message: 'Name must be at least 2 characters.' });
+      user.name = name.trim();
+    }
+    if (email !== undefined) {
+      const normalizedEmail = email.trim().toLowerCase();
+      if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) return res.status(400).json({ message: 'Please provide a valid email address.' });
+      const existing = await User.exists({ email: normalizedEmail, _id: { $ne: user._id } });
+      if (existing) return res.status(409).json({ message: 'An account with this email already exists.' });
+      user.email = normalizedEmail;
+    }
+    if (newPassword) {
+      if (newPassword.length < 8) return res.status(400).json({ message: 'New password must be at least 8 characters.' });
+      if (!currentPassword || !(await bcrypt.compare(currentPassword, user.password))) return res.status(400).json({ message: 'Your current password is incorrect.' });
+      user.password = await bcrypt.hash(newPassword, 12);
+    }
+    await user.save();
+    return res.json({ user: userResponse(user) });
+  } catch (error) { next(error); }
+}
