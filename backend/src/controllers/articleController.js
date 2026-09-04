@@ -67,6 +67,13 @@ export async function getSavedArticles(req, res, next) {
   } catch (error) { next(error); }
 }
 
+export async function getReviewedArticles(req, res, next) {
+  try {
+    const articles = await Article.find({ reviewedBy: req.user._id, status: { $in: ['Published', 'Rejected'] } }).sort({ reviewedAt: -1 });
+    return res.json(articles.map(articleResponse));
+  } catch (error) { next(error); }
+}
+
 export async function toggleSavedArticle(req, res, next) {
   try {
     const article = await Article.findOne({ _id: req.params.id, status: 'Published' });

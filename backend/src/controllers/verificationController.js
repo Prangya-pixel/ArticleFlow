@@ -25,6 +25,8 @@ export async function approveSubmission(req, res, next) {
 
     article.status = 'Published'
     article.publishedAt = new Date()
+    article.reviewedBy = req.user._id
+    article.reviewedAt = new Date()
     await article.save()
 
     await Notification.create({
@@ -71,6 +73,8 @@ export async function rejectSubmission(req, res, next) {
     const note = adminNote.trim()
 
     article.status = 'Rejected'
+    article.reviewedBy = req.user._id
+    article.reviewedAt = new Date()
     await article.save()
 
     await Notification.create({
