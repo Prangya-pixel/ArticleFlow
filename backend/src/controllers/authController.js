@@ -3,7 +3,15 @@ import crypto from 'node:crypto';
 import User from '../models/User.js';
 import { createToken } from '../utils/token.js';
 
-const userResponse = (user) => ({ id: user._id, name: user.name, email: user.email, role: user.role });
+const userResponse = (user) => ({ id: user._id, name: user.name, email: user.email, username: user.username || user.email.split('@')[0], bio: user.bio || '', profilePhoto: user.profilePhoto || '', followersCount: user.followersCount || 0, followingCount: user.followingCount || 0, role: user.role });
+
+async function availableUsername(seed) {
+  const base = seed.toLowerCase().replace(/[^a-z0-9._]/g, '').slice(0, 24) || 'articleflowuser';
+  let username = base.length >= 3 ? base : `${base}user`;
+  let suffix = 1;
+  while (await User.exists({ username })) username = `${base.slice(0, 24)}${suffix++}`;
+  return username;
+}
 
 export async function register(req, res, next) {
   try {
@@ -13,7 +21,7 @@ export async function register(req, res, next) {
     if (!['reader', 'author'].includes(role)) return res.status(400).json({ message: 'Choose reader or author for registration.' });
     const normalizedEmail = email.trim().toLowerCase();
     if (await User.exists({ email: normalizedEmail })) return res.status(409).json({ message: 'An account with this email already exists.' });
-    const user = await User.create({ name, email: normalizedEmail, password: await bcrypt.hash(password, 12), role });
+    const user = await User.create({ name, email: normalizedEmail, username: await availableUsername(normalizedEmail.split('@')[0]), password: await bcrypt.hash(password, 12), role });
     return res.status(201).json({ token: createToken(user), user: userResponse(user) });
   } catch (error) { next(error); }
 }
@@ -32,7 +40,7 @@ export function me(req, res) { return res.json({ user: userResponse(req.user) })
 
 export async function updateProfile(req, res, next) {
   try {
-    const { name, email, currentPassword, newPassword } = req.body;
+    const { name, email, username, bio, profilePhoto, currentPassword, newPassword } = req.body;
     const user = await User.findById(req.user._id).select('+password');
     if (name !== undefined) {
       if (name.trim().length < 2) return res.status(400).json({ message: 'Name must be at least 2 characters.' });
@@ -44,6 +52,21 @@ export async function updateProfile(req, res, next) {
       const existing = await User.exists({ email: normalizedEmail, _id: { $ne: user._id } });
       if (existing) return res.status(409).json({ message: 'An account with this email already exists.' });
       user.email = normalizedEmail;
+    }
+    if (username !== undefined) {
+      const normalizedUsername = username.trim().toLowerCase();
+      if (!/^[a-z0-9._]{3,30}$/.test(normalizedUsername)) return res.status(400).json({ message: 'Username must be 3–30 characters and use only letters, numbers, dots, or underscores.' });
+      const existing = await User.exists({ username: normalizedUsername, _id: { $ne: user._id } });
+      if (existing) return res.status(409).json({ message: 'That username is already taken.' });
+      user.username = normalizedUsername;
+    }
+    if (bio !== undefined) {
+      if (typeof bio !== 'string' || bio.length > 180) return res.status(400).json({ message: 'Bio must be 180 characters or fewer.' });
+      user.bio = bio.trim();
+    }
+    if (profilePhoto !== undefined) {
+      if (typeof profilePhoto !== 'string' || profilePhoto.length > 3_000_000) return res.status(400).json({ message: 'Profile photo is too large. Choose an image under 2 MB.' });
+      user.profilePhoto = profilePhoto;
     }
     if (newPassword) {
       if (newPassword.length < 8) return res.status(400).json({ message: 'New password must be at least 8 characters.' });

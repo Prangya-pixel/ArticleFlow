@@ -54,7 +54,27 @@ export async function getArticle(req, res, next) {
       article.views += 1;
       await article.save();
     }
-    return res.json(articleResponse(article));
+    const response = articleResponse(article);
+    if (req.user?.role === 'reader') response.isSaved = req.user.savedArticles?.includes(article._id) || false;
+    return res.json(response);
+  } catch (error) { next(error); }
+}
+
+export async function getSavedArticles(req, res, next) {
+  try {
+    const articles = await Article.find({ _id: { $in: req.user.savedArticles || [] }, status: 'Published' }).sort({ publishedAt: -1 });
+    return res.json(articles.map((article) => ({ ...articleResponse(article), isSaved: true })));
+  } catch (error) { next(error); }
+}
+
+export async function toggleSavedArticle(req, res, next) {
+  try {
+    const article = await Article.findOne({ _id: req.params.id, status: 'Published' });
+    if (!article) return res.status(404).json({ message: 'Published article not found.' });
+    const saved = req.user.savedArticles?.includes(article._id);
+    if (saved) await User.updateOne({ _id: req.user._id }, { $pull: { savedArticles: article._id } });
+    else await User.updateOne({ _id: req.user._id }, { $addToSet: { savedArticles: article._id } });
+    return res.json({ saved: !saved });
   } catch (error) { next(error); }
 }
 

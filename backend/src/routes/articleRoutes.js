@@ -1,8 +1,10 @@
 import { Router } from 'express';
-import { createArticle, deleteArticle, getArticle, listArticles, updateArticle } from '../controllers/articleController.js';
+import { createArticle, deleteArticle, getArticle, getSavedArticles, listArticles, toggleSavedArticle, updateArticle } from '../controllers/articleController.js';
 import { allowRoles, optionalAuth, requireAuth } from '../middleware/auth.js';
 const router = Router();
 router.get('/', optionalAuth, listArticles);
+router.get('/saved', requireAuth, allowRoles('reader'), getSavedArticles);
+router.patch('/:id/save', requireAuth, allowRoles('reader'), toggleSavedArticle);
 router.get('/:id', optionalAuth, getArticle);
 router.post('/', requireAuth, allowRoles('author'), createArticle);
 router.patch('/:id', requireAuth, allowRoles('author'), updateArticle);

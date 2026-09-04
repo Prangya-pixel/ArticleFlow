@@ -15,6 +15,8 @@ export default function ArticleDetail() {
   const [quiz, setQuiz] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [saved, setSaved] = useState(false)
+  const [savingArticle, setSavingArticle] = useState(false)
 
   const rolePrefix = location.pathname.startsWith('/admin')
     ? 'admin'
@@ -33,6 +35,7 @@ export default function ArticleDetail() {
       .then(([articleData, quizData]) => {
         if (active) {
           setArticle(articleData)
+          setSaved(Boolean(articleData.isSaved))
           setHasQuiz(!!quizData)
           setQuiz(quizData)
           setLoading(false)
@@ -71,6 +74,13 @@ export default function ArticleDetail() {
     if (!window.confirm('Delete this article and its quiz? This cannot be undone.')) return
     try { await articleService.deleteArticle(id); navigate('/author/browse', { replace: true }) } catch (err) { setError(err.message) }
   }
+  async function toggleSave() {
+    try {
+      setSavingArticle(true)
+      const result = await articleService.toggleSavedArticle(id)
+      setSaved(result.saved)
+    } catch (err) { setError(err.message) } finally { setSavingArticle(false) }
+  }
 
   return (
     <article className="article-detail-container">
@@ -94,6 +104,7 @@ export default function ArticleDetail() {
           <span className="meta-dot">&middot;</span>
           <span className="meta-views">👁 {views} views</span>
         </div>
+        {rolePrefix === 'reader' && <button className={`article-save-button ${saved ? 'saved' : ''}`} type="button" disabled={savingArticle} onClick={toggleSave}>{saved ? '★ Saved to your profile' : '☆ Save article'}</button>}
         {rolePrefix === 'author' && <div className="author-article-actions">{canManage ? <><Link className="editor-secondary-button" to={`/author/edit/${id}`}>Edit article</Link><button className="article-delete-button" type="button" onClick={deleteArticle}>Delete article</button></> : <p className="quiz-attached-note">This article is under review and cannot be changed right now.</p>}</div>}
       </header>
 
