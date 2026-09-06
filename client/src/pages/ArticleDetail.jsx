@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom'
 import { articleService } from '../services/articleService'
 import { quizService } from '../services/quizService'
+import { userService } from '../services/userService'
+import { useAuth } from '../context/AuthContext'
 import { QuizPlayer } from '../modules/quiz'
 import Loading from '../components/common/Loading'
 import AdminQuizEditor from '../components/quiz/AdminQuizEditor'
@@ -10,6 +12,7 @@ export default function ArticleDetail() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [article, setArticle] = useState(null)
   const [hasQuiz, setHasQuiz] = useState(false)
   const [quiz, setQuiz] = useState(null)
@@ -17,6 +20,11 @@ export default function ArticleDetail() {
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
   const [savingArticle, setSavingArticle] = useState(false)
+  const [liked, setLiked] = useState(false)
+  const [likesCount, setLikesCount] = useState(0)
+  const [likeLoading, setLikeLoading] = useState(false)
+  const [following, setFollowing] = useState(false)
+  const [followLoading, setFollowLoading] = useState(false)
 
   const rolePrefix = location.pathname.startsWith('/admin')
     ? 'admin'
@@ -33,12 +41,19 @@ export default function ArticleDetail() {
       quizService.getQuizByArticleId(id)
     ])
       .then(([articleData, quizData]) => {
-        if (active) {
-          setArticle(articleData)
-          setSaved(Boolean(articleData.isSaved))
-          setHasQuiz(!!quizData)
-          setQuiz(quizData)
-          setLoading(false)
+        if (!active) return
+        setArticle(articleData)
+        setSaved(Boolean(articleData.isSaved))
+        setLiked(Boolean(articleData.isLiked))
+        setLikesCount(articleData.likesCount || 0)
+        setHasQuiz(!!quizData)
+        setQuiz(quizData)
+        setLoading(false)
+
+        if (rolePrefix === 'reader' && articleData.authorId && user?.id !== articleData.authorId) {
+          userService.getFollowStatus(articleData.authorId)
+            .then((result) => { if (active) setFollowing(Boolean(result.following)) })
+            .catch(() => {})
         }
       })
       .catch((err) => {
@@ -81,6 +96,21 @@ export default function ArticleDetail() {
       setSaved(result.saved)
     } catch (err) { setError(err.message) } finally { setSavingArticle(false) }
   }
+  async function toggleLike() {
+    try {
+      setLikeLoading(true)
+      const result = await articleService.toggleLike(id)
+      setLiked(result.liked)
+      setLikesCount(result.likesCount)
+    } catch (err) { setError(err.message) } finally { setLikeLoading(false) }
+  }
+  async function toggleFollow() {
+    try {
+      setFollowLoading(true)
+      const result = await userService.toggleFollow(article.authorId)
+      setFollowing(result.following)
+    } catch (err) { setError(err.message) } finally { setFollowLoading(false) }
+  }
 
   return (
     <article className="article-detail-container">
@@ -104,7 +134,15 @@ export default function ArticleDetail() {
           <span className="meta-dot">&middot;</span>
           <span className="meta-views">👁 {views} views</span>
         </div>
-        {rolePrefix === 'reader' && <button className={`article-save-button ${saved ? 'saved' : ''}`} type="button" disabled={savingArticle} onClick={toggleSave}>{saved ? '★ Saved to your profile' : '☆ Save article'}</button>}
+        {rolePrefix === 'reader' && (
+          <div className="article-engagement-actions">
+            <button className={`article-save-button ${saved ? 'saved' : ''}`} type="button" disabled={savingArticle} onClick={toggleSave}>{saved ? '★ Saved to your profile' : '☆ Save article'}</button>
+            <button className={`article-like-button ${liked ? 'liked' : ''}`} type="button" disabled={likeLoading} onClick={toggleLike}>{liked ? '♥' : '♡'} {likesCount} {likesCount === 1 ? 'like' : 'likes'}</button>
+            {article.authorId && user?.id !== article.authorId && (
+              <button className={`article-follow-button ${following ? 'following' : ''}`} type="button" disabled={followLoading} onClick={toggleFollow}>{following ? 'Following' : `Follow ${author}`}</button>
+            )}
+          </div>
+        )}
         {rolePrefix === 'author' && <div className="author-article-actions">{canManage ? <><Link className="editor-secondary-button" to={`/author/edit/${id}`}>Edit article</Link><button className="article-delete-button" type="button" onClick={deleteArticle}>Delete article</button></> : <p className="quiz-attached-note">This article is under review and cannot be changed right now.</p>}</div>}
       </header>
 

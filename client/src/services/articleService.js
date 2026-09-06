@@ -15,4 +15,5 @@ export const articleService = {
   getSavedArticles: () => api('/articles/saved'),
   getReviewedArticles: () => api('/articles/reviewed'),
   toggleSavedArticle: (id) => api(`/articles/${id}/save`, { method: 'PATCH', body: '{}' }),
+  toggleLike: (id) => api(`/articles/${id}/like`, { method: 'PATCH', body: '{}' }),
 }

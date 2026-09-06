@@ -1,3 +1,4 @@
+import Like from '../models/Like.js';
 import crypto from 'node:crypto';
 import Article from '../models/Article.js';
 import Quiz from '../models/Quiz.js';
@@ -7,7 +8,7 @@ import Notification from '../models/Notification.js';
 const editableFields = ['title', 'excerpt', 'body', 'category', 'coverImage'];
 const articleResponse = (article) => {
   const data = article.toJSON ? article.toJSON() : article;
-  return { ...data, id: data._id, author: data.authorName || data.author };
+  return { ...data, id: data._id, authorId: data.author, author: data.authorName || data.author };
 };
 
 function validateArticle(data) {
@@ -55,7 +56,11 @@ export async function getArticle(req, res, next) {
       await article.save();
     }
     const response = articleResponse(article);
-    if (req.user?.role === 'reader') response.isSaved = req.user.savedArticles?.includes(article._id) || false;
+    if (req.user?.role === 'reader') {
+      response.isSaved = req.user.savedArticles?.includes(article._id) || false;
+      const existingLike = await Like.findOne({ user: req.user._id, article: article._id });
+      response.isLiked = !!existingLike;
+    }
     return res.json(response);
   } catch (error) { next(error); }
 }
@@ -82,6 +87,32 @@ export async function toggleSavedArticle(req, res, next) {
     if (saved) await User.updateOne({ _id: req.user._id }, { $pull: { savedArticles: article._id } });
     else await User.updateOne({ _id: req.user._id }, { $addToSet: { savedArticles: article._id } });
     return res.json({ saved: !saved });
+  } catch (error) { next(error); }
+}
+
+export async function toggleLike(req, res, next) {
+  try {
+    const article = await Article.findOne({ _id: req.params.id, status: 'Published' });
+    if (!article) return res.status(404).json({ message: 'Published article not found.' });
+    const existing = await Like.findOne({ user: req.user._id, article: article._id });
+    if (existing) {
+      await Like.deleteOne({ _id: existing._id });
+      article.likesCount = Math.max(0, (article.likesCount || 0) - 1);
+      await article.save();
+      return res.json({ liked: false, likesCount: article.likesCount });
+    }
+    await Like.create({ user: req.user._id, article: article._id });
+    article.likesCount = (article.likesCount || 0) + 1;
+    await article.save();
+    if (String(article.author) !== String(req.user._id)) {
+      await Notification.create({
+        recipient: article.author,
+        article: article._id,
+        type: 'LIKED',
+        message: `${req.user.name} liked your article "${article.title}".`
+      });
+    }
+    return res.json({ liked: true, likesCount: article.likesCount });
   } catch (error) { next(error); }
 }
 
