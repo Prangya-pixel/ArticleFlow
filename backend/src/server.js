@@ -7,12 +7,14 @@ import articleRoutes from './routes/articleRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import verificationRoutes from './routes/verificationRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 const app = express();
 app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
 app.use(express.json());
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/notifications', notificationRoutes);
