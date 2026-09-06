@@ -5,6 +5,7 @@ import { quizService } from '../services/quizService'
 import { QuizPlayer } from '../modules/quiz'
 import Loading from '../components/common/Loading'
 import AdminQuizEditor from '../components/quiz/AdminQuizEditor'
+import { CommentSection } from '../modules/comments'
 
 export default function ArticleDetail() {
   const { id } = useParams()
@@ -119,6 +120,7 @@ export default function ArticleDetail() {
           <p key={idx}>{para}</p>
         ))}
       </section>
+            <CommentSection articleId={id} />
 
       {hasQuiz && rolePrefix === 'reader' && (
         <section className="article-detail-quiz-section">

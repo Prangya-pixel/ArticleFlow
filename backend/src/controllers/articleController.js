@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import mongoose from 'mongoose';
 import Article from '../models/Article.js';
 import Quiz from '../models/Quiz.js';
 import User from '../models/User.js';
@@ -7,7 +8,16 @@ import Notification from '../models/Notification.js';
 const editableFields = ['title', 'excerpt', 'body', 'category', 'coverImage'];
 const articleResponse = (article) => {
   const data = article.toJSON ? article.toJSON() : article;
-  return { ...data, id: data._id, author: data.authorName || data.author };
+
+  return {
+    ...data,
+    id: data._id?.toString(),
+    _id: data._id?.toString(),
+    author: data.authorName || data.author,
+    excerpt: data.excerpt || '',
+    body: data.body || data.content || '',
+    coverImage: data.coverImage || data.image || '',
+  };
 };
 
 function validateArticle(data) {
@@ -44,20 +54,70 @@ export async function listArticles(req, res, next) {
 
 export async function getArticle(req, res, next) {
   try {
-    const article = await Article.findById(req.params.id);
-    if (!article) return res.status(404).json({ message: 'Article not found.' });
-    const ownsArticle = req.user && String(article.author) === String(req.user._id);
-    if (article.status !== 'Published' && req.user?.role !== 'admin' && !ownsArticle) return res.status(404).json({ message: 'Article not found.' });
-    // Only real reader visits contribute to the public view count. Author and
-    // admin visits are previews or management activity and must not inflate it.
-    if (article.status === 'Published' && req.user?.role === 'reader') {
-      article.views += 1;
-      await article.save();
+    const { id } = req.params;
+
+    let article;
+
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      article = await Article.collection.findOne({
+        _id: new mongoose.Types.ObjectId(id),
+      });
     }
-    const response = articleResponse(article);
-    if (req.user?.role === 'reader') response.isSaved = req.user.savedArticles?.includes(article._id) || false;
+
+    if (!article) {
+      article = await Article.collection.findOne({ _id: id });
+    }
+
+    if (!article) {
+      return res.status(404).json({ message: 'Article not found.' });
+    }
+
+    const ownsArticle =
+      req.user && String(article.author) === String(req.user._id);
+
+    if (
+      article.status !== 'Published' &&
+      req.user?.role !== 'admin' &&
+      !ownsArticle
+    ) {
+      return res.status(404).json({ message: 'Article not found.' });
+    }
+
+    if (
+      article.status === 'Published' &&
+      req.user?.role === 'reader'
+    ) {
+      await Article.collection.updateOne(
+        { _id: article._id },
+        { $inc: { views: 1 } }
+      );
+
+      article.views = (article.views || 0) + 1;
+    }
+
+    const data = article.toJSON ? article.toJSON() : article;
+
+    const response = {
+      ...data,
+      id: data._id?.toString(),
+      _id: data._id?.toString(),
+      author: data.authorName || data.author?.toString(),
+      excerpt: data.excerpt || '',
+      body: data.body || data.content || '',
+      coverImage: data.coverImage || data.image || '',
+    };
+
+    if (req.user?.role === 'reader') {
+      response.isSaved =
+        req.user.savedArticles?.some(
+          (savedId) => String(savedId) === String(article._id)
+        ) || false;
+    }
+
     return res.json(response);
-  } catch (error) { next(error); }
+  } catch (error) {
+    next(error);
+  }
 }
 
 export async function getSavedArticles(req, res, next) {
