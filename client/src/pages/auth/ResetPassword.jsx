@@ -1,0 +1,11 @@
+import { useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { authService } from '../../services/authService'
+import '../../modules/auth/authentication.css'
+
+export default function ResetPassword() {
+  const [params] = useSearchParams(); const token = params.get('token')
+  const [password, setPassword] = useState(''); const [confirmPassword, setConfirmPassword] = useState(''); const [message, setMessage] = useState(''); const [error, setError] = useState(''); const [busy, setBusy] = useState(false)
+  async function submit(event) { event.preventDefault(); setError(''); setMessage(''); if (password !== confirmPassword) return setError('Passwords do not match.'); try { setBusy(true); const data = await authService.resetPassword(token, password); setMessage(data.message) } catch (err) { setError(err.message) } finally { setBusy(false) } }
+  return <main className="auth-page font-sans"><section className="auth-layout"><aside className="brand-panel"><div className="brand"><span className="brand-mark">AF</span><span>ArticleFlow</span></div><div className="brand-copy"><p className="eyebrow">ACCOUNT RECOVERY</p><h1>Set a fresh password.</h1><p>Your reset link is single-use and expires after 15 minutes.</p></div></aside><section className="form-panel"><div className="form-heading"><p className="eyebrow">NEW PASSWORD</p><h2>Secure your account.</h2><p>Choose a password with at least eight characters.</p></div>{!token ? <><p className="error">This reset link is incomplete or invalid.</p><p className="switch"><Link className="link" to="/login">Return to sign in</Link></p></> : message ? <><p className="success-message">{message}</p><p className="switch"><Link className="link" to="/login">Sign in now</Link></p></> : <form onSubmit={submit}><label>New password<input type="password" value={password} onChange={event => setPassword(event.target.value)} required minLength="8" autoComplete="new-password" /></label><label>Confirm new password<input type="password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} required minLength="8" autoComplete="new-password" /></label>{error && <p className="error">{error}</p>}<button className="submit-button" disabled={busy}>{busy ? 'Resetting…' : 'Reset password'} <span>→</span></button></form>}</section></section></main>
+}

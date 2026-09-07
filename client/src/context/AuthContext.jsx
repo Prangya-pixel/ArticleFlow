@@ -23,7 +23,12 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
-  return <AuthContext.Provider value={{ user, role: user?.role ?? null, signIn, signOut }}>{children}</AuthContext.Provider>
+  function updateUser(updatedUser) {
+    localStorage.setItem('articleflow_user', JSON.stringify(updatedUser))
+    setUser(updatedUser)
+  }
+
+  return <AuthContext.Provider value={{ user, role: user?.role ?? null, signIn, signOut, updateUser }}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

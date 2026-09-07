@@ -7,7 +7,8 @@ const articleSchema = new mongoose.Schema({
   body: { type: String, required: true },
   category: { type: String, required: true, trim: true },
   tags: { type: [String], default: [] },
-  author: { type: String, required: true, trim: true },
+  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  authorName: { type: String, required: true, trim: true },
   status: { 
     type: String, 
     enum: ['Draft', 'Pending', 'Approved', 'Published', 'Rejected', 'Changes Requested'], 
@@ -16,7 +17,10 @@ const articleSchema = new mongoose.Schema({
   coverImage: { type: String },
   readMinutes: { type: Number, default: 0 },
   views: { type: Number, default: 0 },
-  publishedAt: { type: Date }
+  likesCount: { type: Number, default: 0, min: 0 },
+  publishedAt: { type: Date },
+  reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  reviewedAt: { type: Date }
 }, { 
   timestamps: true, 
   versionKey: false,

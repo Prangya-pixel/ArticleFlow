@@ -1,2 +1,2 @@
-import PlaceholderPage from '../../components/common/PlaceholderPage'
-export default function AuthorProfile() { return <PlaceholderPage eyebrow="Author profile" title="Your profile." description="Profile settings are coming soon." /> }
+import ProfileSettings from '../../components/profile/ProfileSettings'
+export default function AuthorProfile() { return <ProfileSettings title="Your author profile." description="Keep your account details current while you publish." /> }

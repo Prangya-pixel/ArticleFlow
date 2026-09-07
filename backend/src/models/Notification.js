@@ -10,11 +10,11 @@ const notificationSchema = new mongoose.Schema(
     article: {
       type: String,
       ref: 'Article',
-      required: true
+      required: false
     },
     type: {
       type: String,
-      enum: ['APPROVED', 'REJECTED', 'CHANGES_REQUESTED'],
+      enum: ['APPROVED', 'REJECTED', 'CHANGES_REQUESTED', 'SUBMITTED', 'PUBLISHED', 'LIKED', 'FOLLOWED'],
       required: true
     },
     message: {
