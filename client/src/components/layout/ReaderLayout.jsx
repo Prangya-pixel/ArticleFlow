@@ -6,6 +6,7 @@ const items = [
   { label: 'Home', to: '/reader/home' },
   { label: 'Browse', to: '/reader/browse' },
   { label: 'Profile', to: '/reader/profile' },
+{ label: 'Chat', to: '/chat' },
 ]
 
 export default function ReaderLayout() {

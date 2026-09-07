@@ -16,7 +16,7 @@ import ReaderBrowse from './pages/reader/ReaderBrowse'
 import ReaderProfile from './pages/reader/ReaderProfile'
 import ArticleDetail from './pages/ArticleDetail'
 import NotFound from './pages/NotFound'
-
+import Chat from './pages/Chat'
 export default function App() {
   return (
     <Routes>
@@ -48,6 +48,7 @@ export default function App() {
         <Route path="article/:id" element={<ArticleDetail />} />
         <Route path="profile" element={<ReaderProfile />} />
       </Route>
+      <Route path="/chat" element={<Chat />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

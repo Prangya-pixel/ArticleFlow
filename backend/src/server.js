@@ -3,11 +3,13 @@ import cors from 'cors';
 import express from 'express';
 import { connectDatabase } from './config/database.js';
 import authRoutes from './routes/authRoutes.js';
+import chatRoutes from './routes/chatRoutes.js';
 
 const app = express();
 app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
 app.use(express.json());
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
+app.use('/api/chat', chatRoutes);
 app.use('/api/auth', authRoutes);
 app.use((error, _req, res, _next) => { console.error(error); res.status(500).json({ message: 'Something went wrong. Please try again.' }); });
 

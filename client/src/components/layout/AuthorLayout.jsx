@@ -7,6 +7,7 @@ const items = [
   { label: 'Browse', to: '/author/browse' },
   { label: 'Create', to: '/author/create' },
   { label: 'Profile', to: '/author/profile' },
+{ label: 'Chat', to: '/chat' },
 ]
 
 export default function AuthorLayout() {
