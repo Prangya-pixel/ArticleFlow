@@ -19,6 +19,7 @@ app.use('/api/articles', articleRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/verification', verificationRoutes);
+app.use('/api/users', userRoutes);
 app.use((error, _req, res, _next) => { console.error(error); res.status(500).json({ message: 'Something went wrong. Please try again.' }); });
 
 const port = process.env.PORT || 5000;
