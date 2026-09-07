@@ -11,6 +11,8 @@ function notificationLabel(type) {
   if (type === 'CHANGES_REQUESTED') return 'Changes requested'
   if (type === 'SUBMITTED') return 'Submission received'
   if (type === 'PUBLISHED') return 'New article published'
+  if (type === 'LIKED') return 'New like'
+  if (type === 'FOLLOWED') return 'New follower'
   return 'Notification'
 }
 
@@ -20,6 +22,8 @@ function notificationClass(type) {
   if (type === 'CHANGES_REQUESTED') return 'notification-changes'
   if (type === 'SUBMITTED') return 'notification-submitted'
   if (type === 'PUBLISHED') return 'notification-published'
+  if (type === 'LIKED') return 'notification-liked'
+  if (type === 'FOLLOWED') return 'notification-followed'
   return ''
 }
 
@@ -27,6 +31,8 @@ function notificationIcon(type) {
   if (type === 'APPROVED' || type === 'PUBLISHED') return '✓'
   if (type === 'REJECTED') return '×'
   if (type === 'SUBMITTED') return '↗'
+  if (type === 'LIKED') return '♥'
+  if (type === 'FOLLOWED') return '＋'
   return '✎'
 }
 
