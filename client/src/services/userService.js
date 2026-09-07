@@ -1,6 +1,14 @@
-import { api } from './api'
+import { api } from './api.js'
 
 export const userService = {
-  getFollowStatus: (userId) => api(`/users/${userId}/follow`),
-  toggleFollow: (userId) => api(`/users/${userId}/follow`, { method: 'PATCH', body: '{}' }),
+  getPublicProfile: (userId) => api(`/users/${userId}/profile`),
+
+  getFollowStatus: (userId) =>
+    api(`/users/${userId}/follow`),
+
+  toggleFollow: (userId) =>
+    api(`/users/${userId}/follow`, {
+      method: 'PATCH',
+      body: '{}',
+    }),
 }

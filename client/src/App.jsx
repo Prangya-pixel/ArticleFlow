@@ -20,6 +20,7 @@ import NotFound from './pages/NotFound'
 import Chat from './pages/Chat'
 import Notifications from './pages/author/Notifications'
 import ProtectedRoute from './components/common/ProtectedRoute'
+import PublicProfile from './pages/PublicProfile'
 
 export default function App() {
   return (
@@ -27,6 +28,9 @@ export default function App() {
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* Public profile - can be viewed without login */}
+      <Route path="/profile/:userId" element={<PublicProfile />} />
 
       <Route element={<ProtectedRoute role="author" />}>
         <Route path="/author" element={<AuthorLayout />}>
