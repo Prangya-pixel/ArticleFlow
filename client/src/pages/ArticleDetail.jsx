@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { QuizPlayer } from '../modules/quiz'
 import Loading from '../components/common/Loading'
 import AdminQuizEditor from '../components/quiz/AdminQuizEditor'
-import CommentSection from '../components/comments/CommentSection'
+import { CommentSection } from '../modules/comments'
 
 export default function ArticleDetail() {
   const { id } = useParams()
@@ -193,14 +193,19 @@ export default function ArticleDetail() {
         <div className="article-detail-meta">
           <span className="meta-author">By {author}</span>
           <span className="meta-dot">&middot;</span>
+
           <span className="meta-date">
             {publishedAt || 'Unpublished'}
           </span>
+
           <span className="meta-dot">&middot;</span>
+
           <span className="meta-read-time">
             {readMinutes} min read
           </span>
+
           <span className="meta-dot">&middot;</span>
+
           <span className="meta-views">
             👁 {views} views
           </span>
@@ -293,6 +298,8 @@ export default function ArticleDetail() {
           ))}
       </section>
 
+      <CommentSection articleId={id} />
+
       {hasQuiz && rolePrefix === 'reader' && (
         <section className="article-detail-quiz-section">
           <div className="quiz-section-divider"></div>
@@ -321,8 +328,6 @@ export default function ArticleDetail() {
           />
         </section>
       )}
-
-      <CommentSection />
     </article>
   )
 }

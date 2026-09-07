@@ -8,6 +8,7 @@ import articleRoutes from './routes/articleRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import verificationRoutes from './routes/verificationRoutes.js';
+import commentRoutes from './routes/commentRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 
 const app = express();
@@ -21,7 +22,7 @@ app.use('/api/articles', articleRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/verification', verificationRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/comments', commentRoutes);
 app.use((error, _req, res, _next) => { console.error(error); res.status(500).json({ message: 'Something went wrong. Please try again.' }); });
 
 const port = process.env.PORT || 5000;
