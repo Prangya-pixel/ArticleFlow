@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import CommentForm from './CommentForm'
 import { commentService } from '../../services/commentService'
@@ -11,7 +12,7 @@ export default function CommentItem({
 
   const [showReplyForm, setShowReplyForm] = useState(false)
   const [liked, setLiked] = useState(
-    user ? comment.likes?.some((id) => id === user._id) : false
+    user ? comment.likes?.some((id) => String(id) === String(user.id || user._id)) : false
   )
   const [likesCount, setLikesCount] = useState(
     comment.likes?.length || 0
@@ -67,15 +68,7 @@ export default function CommentItem({
         </div>
 
         <div>
-          <strong>
-            {author?.name || 'Unknown User'}
-          </strong>
-
-          {author?.username && (
-            <span className="comment-username">
-              @{author.username}
-            </span>
-          )}
+          {author?._id ? <Link className="comment-author-link" to={`/profile/${author._id}`}><strong>{author?.name || 'Unknown User'}</strong>{author?.username && <span className="comment-username">@{author.username}</span>}</Link> : <><strong>{author?.name || 'Unknown User'}</strong>{author?.username && <span className="comment-username">@{author.username}</span>}</>}
         </div>
 
       </div>

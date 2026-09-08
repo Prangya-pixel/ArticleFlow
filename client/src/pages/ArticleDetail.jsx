@@ -13,7 +13,7 @@ export default function ArticleDetail() {
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, updateUser } = useAuth()
 
   const [article, setArticle] = useState(null)
   const [hasQuiz, setHasQuiz] = useState(false)
@@ -24,6 +24,7 @@ export default function ArticleDetail() {
   const [savingArticle, setSavingArticle] = useState(false)
   const [liked, setLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(0)
+  const [commentsCount, setCommentsCount] = useState(0)
   const [likeLoading, setLikeLoading] = useState(false)
   const [following, setFollowing] = useState(false)
   const [followLoading, setFollowLoading] = useState(false)
@@ -49,6 +50,7 @@ export default function ArticleDetail() {
         setSaved(Boolean(articleData.isSaved))
         setLiked(Boolean(articleData.isLiked))
         setLikesCount(articleData.likesCount || 0)
+        setCommentsCount(articleData.commentsCount || 0)
         setHasQuiz(!!quizData)
         setQuiz(quizData)
         setLoading(false)
@@ -165,6 +167,7 @@ export default function ArticleDetail() {
       const result = await userService.toggleFollow(article.authorId)
 
       setFollowing(result.following)
+      updateUser({ ...user, followingCount: result.currentFollowingCount })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -191,7 +194,7 @@ export default function ArticleDetail() {
         <p className="article-detail-excerpt">{excerpt}</p>
 
         <div className="article-detail-meta">
-          <span className="meta-author">By {author}</span>
+          {article.authorId ? <Link className="meta-author article-author-link" to={`/profile/${article.authorId}`}>By {author}</Link> : <span className="meta-author">By {author}</span>}
           <span className="meta-dot">&middot;</span>
 
           <span className="meta-date">
@@ -211,9 +214,9 @@ export default function ArticleDetail() {
           </span>
         </div>
 
-        {rolePrefix === 'reader' && (
+        {article.status === 'Published' && user && (
           <div className="article-engagement-actions">
-            <button
+            {rolePrefix === 'reader' && <button
               className={`article-save-button ${saved ? 'saved' : ''}`}
               type="button"
               disabled={savingArticle}
@@ -222,7 +225,7 @@ export default function ArticleDetail() {
               {saved
                 ? '★ Saved to your profile'
                 : '☆ Save article'}
-            </button>
+            </button>}
 
             <button
               className={`article-like-button ${liked ? 'liked' : ''}`}
@@ -234,7 +237,7 @@ export default function ArticleDetail() {
               {likesCount === 1 ? 'like' : 'likes'}
             </button>
 
-            {article.authorId &&
+            {rolePrefix === 'reader' && article.authorId &&
               user?.id !== article.authorId && (
                 <button
                   className={`article-follow-button ${
@@ -249,6 +252,7 @@ export default function ArticleDetail() {
                     : `Follow ${author}`}
                 </button>
               )}
+            <span className="article-comment-count">◌ {commentsCount} {commentsCount === 1 ? 'comment' : 'comments'}</span>
           </div>
         )}
 
@@ -298,7 +302,7 @@ export default function ArticleDetail() {
           ))}
       </section>
 
-      <CommentSection articleId={id} />
+      <CommentSection articleId={id} onCommentAdded={() => setCommentsCount(current => current + 1)} />
 
       {hasQuiz && rolePrefix === 'reader' && (
         <section className="article-detail-quiz-section">

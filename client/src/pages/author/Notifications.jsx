@@ -4,6 +4,7 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
 } from '../../services/notificationService'
+import { useAuth } from '../../context/AuthContext'
 
 function notificationLabel(type) {
   if (type === 'APPROVED') return 'Article approved'
@@ -37,6 +38,7 @@ function notificationIcon(type) {
 }
 
 export default function Notifications({ role = 'author' }) {
+  const { user } = useAuth()
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -47,7 +49,7 @@ export default function Notifications({ role = 'author' }) {
       setError('')
 
       const data = await getNotifications()
-      setNotifications(data)
+      setNotifications(data.filter(notification => String(notification.recipient) === String(user?.id || user?._id)))
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -61,7 +63,7 @@ export default function Notifications({ role = 'author' }) {
 
   useEffect(() => {
     loadNotifications()
-  }, [])
+  }, [user?.id, user?._id])
 
   async function handleRead(id) {
     try {

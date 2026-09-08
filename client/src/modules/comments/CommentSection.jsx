@@ -5,7 +5,7 @@ import CommentForm from './CommentForm'
 import CommentItem from './CommentItem.jsx'
 import './comments.css'
 
-export default function CommentSection({ articleId }) {
+export default function CommentSection({ articleId, onCommentAdded: onArticleCommentAdded }) {
   const { user } = useAuth()
 
   const [comments, setComments] = useState([])
@@ -39,6 +39,7 @@ export default function CommentSection({ articleId }) {
       ...currentComments,
       newComment,
     ])
+    onArticleCommentAdded?.(newComment)
   }
 
   function getReplies(commentId) {

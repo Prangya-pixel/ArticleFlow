@@ -1,4 +1,5 @@
 import Like from '../models/Like.js';
+import Comment from '../models/Comment.js';
 import crypto from 'node:crypto';
 import mongoose from 'mongoose';
 import Article from '../models/Article.js';
@@ -22,6 +23,13 @@ const articleResponse = (article) => {
     coverImage: data.coverImage || data.image || '',
   };
 };
+
+async function withEngagement(article) {
+  const response = articleResponse(article);
+  response.likesCount = response.likesCount || 0;
+  response.commentsCount = await Comment.countDocuments({ articleId: String(article._id) });
+  return response;
+}
 
 function validateArticle(data) {
   return ['title', 'excerpt', 'body', 'category'].find(
@@ -102,7 +110,7 @@ export async function listArticles(req, res, next) {
       .sort({ createdAt: -1 })
       .limit(100);
 
-    res.json(articles.map(articleResponse));
+    res.json(await Promise.all(articles.map(withEngagement)));
   } catch (error) {
     next(error);
   }
@@ -160,7 +168,7 @@ export async function getArticle(req, res, next) {
       article.views = (article.views || 0) + 1;
     }
 
-    const response = articleResponse(article);
+    const response = await withEngagement(article);
 
     if (req.user?.role === 'reader') {
       response.isSaved =
@@ -169,11 +177,10 @@ export async function getArticle(req, res, next) {
             String(savedId) === String(article._id)
         ) || false;
 
-      const existingLike = await Like.findOne({
-        user: req.user._id,
-        article: article._id,
-      });
+    }
 
+    if (req.user) {
+      const existingLike = await Like.findOne({ user: req.user._id, article: article._id });
       response.isLiked = !!existingLike;
     }
 
@@ -190,12 +197,8 @@ export async function getSavedArticles(req, res, next) {
       status: 'Published',
     }).sort({ publishedAt: -1 });
 
-    return res.json(
-      articles.map((article) => ({
-        ...articleResponse(article),
-        isSaved: true,
-      }))
-    );
+    const responses = await Promise.all(articles.map(withEngagement));
+    return res.json(responses.map((article) => ({ ...article, isSaved: true })));
   } catch (error) {
     next(error);
   }
@@ -208,7 +211,7 @@ export async function getReviewedArticles(req, res, next) {
       status: { $in: ['Published', 'Rejected'] },
     }).sort({ reviewedAt: -1 });
 
-    return res.json(articles.map(articleResponse));
+    return res.json(await Promise.all(articles.map(withEngagement)));
   } catch (error) {
     next(error);
   }
