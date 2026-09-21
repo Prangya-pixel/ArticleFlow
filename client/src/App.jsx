@@ -21,6 +21,8 @@ import Chat from './pages/Chat'
 import Notifications from './pages/author/Notifications'
 import ProtectedRoute from './components/common/ProtectedRoute'
 import PublicProfile from './pages/PublicProfile'
+import ModerationDashboard from './pages/admin/moderation/ModerationDashboard'
+import ModerationReview from './pages/admin/moderation/ModerationReview'
 
 export default function App() {
   return (
@@ -54,6 +56,8 @@ export default function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="notifications" element={<Notifications role="admin" />} />
+          <Route path="moderation" element={<ModerationDashboard />} />
+<Route path="moderation/:id" element={<ModerationReview />} />
         </Route>
       </Route>
 
