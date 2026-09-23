@@ -94,6 +94,9 @@ export default function ModerationDashboard() {
             Review AI-generated risk analysis for submitted content.
           </p>
         </div>
+        <Link className="button" to="/admin/moderation/audit">
+          Open audit log
+        </Link>
       </div>
 
       {error && <p className="error">{error}</p>}
