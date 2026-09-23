@@ -19,7 +19,16 @@ export async function approveSubmission(req, res, next) {
     }
 
     if (article.status !== 'Pending') {
-      return res.status(400).json({ message: 'Only pending articles can be approved.' })
+      return res.status(400).json({
+        message: 'Only pending articles can be approved.'
+      })
+    }
+
+    // Spam approval must be completed before publishing
+    if (!['Clean', 'Approved'].includes(article.spamStatus)) {
+      return res.status(400).json({
+        message: 'Spam approval is required before this article can be published.'
+      })
     }
 
     article.status = 'Published'
@@ -34,6 +43,7 @@ export async function approveSubmission(req, res, next) {
       type: 'APPROVED',
       message: `Your article "${article.title}" has been approved.`
     })
+
     return res.json({
       message: 'Article approved successfully.',
       article
@@ -48,17 +58,23 @@ export async function rejectSubmission(req, res, next) {
     const { adminNote } = req.body
 
     if (!adminNote?.trim()) {
-      return res.status(400).json({ message: 'Rejection reason is required.' })
+      return res.status(400).json({
+        message: 'Rejection reason is required.'
+      })
     }
 
     const article = await Article.findById(req.params.id)
 
     if (!article) {
-      return res.status(404).json({ message: 'Article not found.' })
+      return res.status(404).json({
+        message: 'Article not found.'
+      })
     }
 
     if (article.status !== 'Pending') {
-      return res.status(400).json({ message: 'Only pending articles can be rejected.' })
+      return res.status(400).json({
+        message: 'Only pending articles can be rejected.'
+      })
     }
 
     const note = adminNote.trim()
@@ -89,13 +105,17 @@ export async function requestChanges(req, res, next) {
     const { adminNote } = req.body
 
     if (!adminNote?.trim()) {
-      return res.status(400).json({ message: 'Change request message is required.' })
+      return res.status(400).json({
+        message: 'Change request message is required.'
+      })
     }
 
     const article = await Article.findById(req.params.id)
 
     if (!article) {
-      return res.status(404).json({ message: 'Article not found.' })
+      return res.status(404).json({
+        message: 'Article not found.'
+      })
     }
 
     if (article.status !== 'Pending') {
