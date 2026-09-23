@@ -12,6 +12,9 @@ import AdminHome from './pages/admin/AdminHome'
 import AdminBrowse from './pages/admin/AdminBrowse'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminProfile from './pages/admin/AdminProfile'
+import SpamApproval from './pages/admin/SpamApproval'
+import ModerationDashboard from './pages/admin/moderation/ModerationDashboard'
+import ModerationReview from './pages/admin/moderation/ModerationReview'
 import ReaderHome from './pages/reader/ReaderHome'
 import ReaderBrowse from './pages/reader/ReaderBrowse'
 import ReaderProfile from './pages/reader/ReaderProfile'
@@ -23,6 +26,7 @@ import ProtectedRoute from './components/common/ProtectedRoute'
 import PublicProfile from './pages/PublicProfile'
 import ModerationDashboard from './pages/admin/moderation/ModerationDashboard'
 import ModerationReview from './pages/admin/moderation/ModerationReview'
+import ModerationAuditLog from './pages/admin/moderation/ModerationAuditLog'
 
 export default function App() {
   return (
@@ -43,7 +47,10 @@ export default function App() {
           <Route path="create" element={<CreateArticle />} />
           <Route path="edit/:id" element={<CreateArticle />} />
           <Route path="profile" element={<AuthorProfile />} />
-          <Route path="notifications" element={<Notifications role="author" />} />
+          <Route
+            path="notifications"
+            element={<Notifications role="author" />}
+          />
         </Route>
       </Route>
 
@@ -54,10 +61,25 @@ export default function App() {
           <Route path="browse" element={<AdminBrowse />} />
           <Route path="article/:id" element={<ArticleDetail />} />
           <Route path="dashboard" element={<AdminDashboard />} />
+
+          {/* Phase 3 - Spam Content Approval */}
+          <Route path="spam-approval" element={<SpamApproval />} />
+
+          {/* Phase 3 - AI Content Moderation */}
+          <Route
+            path="moderation"
+            element={<ModerationDashboard />}
+          />
+          <Route
+            path="moderation/:id"
+            element={<ModerationReview />}
+          />
+
           <Route path="profile" element={<AdminProfile />} />
           <Route path="notifications" element={<Notifications role="admin" />} />
           <Route path="moderation" element={<ModerationDashboard />} />
-<Route path="moderation/:id" element={<ModerationReview />} />
+          <Route path="moderation/audit" element={<ModerationAuditLog />} />
+          <Route path="moderation/:id" element={<ModerationReview />} />
         </Route>
       </Route>
 
@@ -68,10 +90,14 @@ export default function App() {
           <Route path="browse" element={<ReaderBrowse />} />
           <Route path="article/:id" element={<ArticleDetail />} />
           <Route path="profile" element={<ReaderProfile />} />
-          <Route path="notifications" element={<Notifications role="reader" />} />
+          <Route
+            path="notifications"
+            element={<Notifications role="reader" />}
+          />
         </Route>
       </Route>
 
+      {/* Chat is available to authenticated users */}
       <Route element={<ProtectedRoute />}>
         <Route path="/chat" element={<Chat />} />
       </Route>

@@ -1,11 +1,21 @@
-import OpenAI from 'openai'
+import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+let openai;
+
+function getOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    return null;
+  }
+
+  openai ||= new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  return openai;
+}
 
 function detectSuspiciousLinks(text) {
-  const urls = text.match(/https?:\/\/[^\s]+/gi) || []
+  const urls = text.match(/https?:\/\/[^\s]+/gi) || [];
 
   const suspiciousPatterns = [
     /\.tk\b/i,
@@ -15,49 +25,47 @@ function detectSuspiciousLinks(text) {
     /\.gq\b/i,
     /bit\.ly/i,
     /tinyurl\.com/i,
-  ]
+  ];
 
   return urls.some((url) =>
-    suspiciousPatterns.some((pattern) => pattern.test(url))
-  )
+    suspiciousPatterns.some((pattern) => pattern.test(url)),
+  );
 }
 
 function detectPII(text) {
-  const email = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i
-  const phone = /\b(?:\+91[-\s]?)?[6-9]\d{9}\b/
-  const aadhaar = /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/
+  const email = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
+  const phone = /\b(?:\+91[-\s]?)?[6-9]\d{9}\b/;
+  const aadhaar = /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/;
 
   return {
     email: email.test(text),
     phone: phone.test(text),
     aadhaar: aadhaar.test(text),
-  }
+  };
 }
 
 function detectSpam(text) {
-  const normalizedText = text.toLowerCase().trim()
+  const normalizedText = text.toLowerCase().trim();
 
   if (!normalizedText) {
-    return false
+    return false;
   }
 
   // Repeated words or phrases
-  const words = normalizedText.split(/\s+/)
+  const words = normalizedText.split(/\s+/);
 
   if (words.length >= 8) {
-    const wordCounts = {}
+    const wordCounts = {};
 
     for (const word of words) {
-      if (word.length < 3) continue
-      wordCounts[word] = (wordCounts[word] || 0) + 1
+      if (word.length < 3) continue;
+      wordCounts[word] = (wordCounts[word] || 0) + 1;
     }
 
-    const repeatedWord = Object.values(wordCounts).some(
-      (count) => count >= 5
-    )
+    const repeatedWord = Object.values(wordCounts).some((count) => count >= 5);
 
     if (repeatedWord) {
-      return true
+      return true;
     }
   }
 
@@ -71,100 +79,104 @@ function detectSpam(text) {
     /winner/i,
     /congratulations.*claim/i,
     /visit my profile/i,
-  ]
+  ];
 
-  return spamPatterns.some((pattern) => pattern.test(normalizedText))
+  return spamPatterns.some((pattern) => pattern.test(normalizedText));
 }
 
 function calculateRiskScore(moderation, pii, suspiciousLink, spam) {
-  const scores = moderation.category_scores || {}
+  const scores = moderation.category_scores || {};
 
   const categoryScores = [
     scores.harassment || 0,
-    scores['harassment/threatening'] || 0,
+    scores["harassment/threatening"] || 0,
     scores.hate || 0,
-    scores['hate/threatening'] || 0,
+    scores["hate/threatening"] || 0,
     scores.violence || 0,
-    scores['violence/graphic'] || 0,
+    scores["violence/graphic"] || 0,
     scores.sexual || 0,
-    scores['sexual/minors'] || 0,
+    scores["sexual/minors"] || 0,
     scores.illicit || 0,
-  ]
+  ];
 
-  let riskScore = Math.max(...categoryScores)
+  let riskScore = Math.max(...categoryScores);
 
   if (spam) {
-    riskScore = Math.max(riskScore, 0.6)
+    riskScore = Math.max(riskScore, 0.6);
   }
 
   if (suspiciousLink) {
-    riskScore = Math.max(riskScore, 0.65)
+    riskScore = Math.max(riskScore, 0.65);
   }
 
   if (pii.email || pii.phone || pii.aadhaar) {
-    riskScore = Math.max(riskScore, 0.55)
+    riskScore = Math.max(riskScore, 0.55);
   }
 
-  return Number(Math.min(riskScore, 1).toFixed(2))
+  return Number(Math.min(riskScore, 1).toFixed(2));
 }
 
 function getRiskLevel(riskScore) {
-  if (riskScore >= 0.7) {
-    return 'HIGH'
+  if (riskScore >= 0.8) {
+    return "HIGH";
   }
 
-  if (riskScore >= 0.4) {
-    return 'MEDIUM'
+  if (riskScore > 0.2) {
+    return "MEDIUM";
   }
 
-  return 'LOW'
+  return "LOW";
 }
 
 function getRecommendation(riskLevel) {
-  if (riskLevel === 'HIGH') {
-    return 'BLOCK'
+  if (riskLevel === "HIGH") {
+    return "BLOCK";
   }
 
-  if (riskLevel === 'MEDIUM') {
-    return 'REVIEW'
+  if (riskLevel === "MEDIUM") {
+    return "REVIEW";
   }
 
-  return 'SAFE'
+  return "SAFE";
 }
 
-export async function analyzeContent({ title = '', content = '' }) {
-  const combinedText = `${title}\n${content}`.trim()
+export async function analyzeContent({ title = "", content = "" }) {
+  const combinedText = `${title}\n${content}`.trim();
 
   if (!combinedText) {
-    throw new Error('Content is required for moderation analysis.')
+    throw new Error("Content is required for moderation analysis.");
   }
 
-  const response = await openai.moderations.create({
-    model: 'omni-moderation-latest',
-    input: combinedText,
-  })
+  const openaiClient = getOpenAIClient();
+  let result = {
+    flagged: false,
+    categories: {},
+    category_scores: {},
+  };
 
-  const result = response.results?.[0]
+  if (openaiClient) {
+    const response = await openaiClient.moderations.create({
+      model: "omni-moderation-latest",
+      input: combinedText,
+    });
 
-  if (!result) {
-    throw new Error('The moderation service returned no analysis result.')
+    result = response.results?.[0];
+
+    if (!result) {
+      throw new Error("The moderation service returned no analysis result.");
+    }
   }
 
-  const categories = result.categories || {}
-  const categoryScores = result.category_scores || {}
+  const categories = result.categories || {};
+  const categoryScores = result.category_scores || {};
 
-  const pii = detectPII(combinedText)
-  const suspiciousLink = detectSuspiciousLinks(combinedText)
-  const spam = detectSpam(combinedText)
+  const pii = detectPII(combinedText);
+  const suspiciousLink = detectSuspiciousLinks(combinedText);
+  const spam = detectSpam(combinedText);
 
-  const riskScore = calculateRiskScore(
-    result,
-    pii,
-    suspiciousLink,
-    spam
-  )
+  const riskScore = calculateRiskScore(result, pii, suspiciousLink, spam);
 
-  const riskLevel = getRiskLevel(riskScore)
+  const riskLevel = getRiskLevel(riskScore);
 
   return {
     riskScore,
@@ -174,32 +186,18 @@ export async function analyzeContent({ title = '', content = '' }) {
       spam,
 
       toxic: Boolean(
-        categories.harassment ||
-        categories['harassment/threatening']
+        categories.harassment || categories["harassment/threatening"],
       ),
 
-      hateSpeech: Boolean(
-        categories.hate ||
-        categories['hate/threatening']
-      ),
+      hateSpeech: Boolean(categories.hate || categories["hate/threatening"]),
 
-      inappropriate: Boolean(
-        categories.sexual ||
-        categories['sexual/minors']
-      ),
+      inappropriate: Boolean(categories.sexual || categories["sexual/minors"]),
 
-      violence: Boolean(
-        categories.violence ||
-        categories['violence/graphic']
-      ),
+      violence: Boolean(categories.violence || categories["violence/graphic"]),
 
       suspiciousLinks: suspiciousLink,
 
-      pii: Boolean(
-        pii.email ||
-        pii.phone ||
-        pii.aadhaar
-      ),
+      pii: Boolean(pii.email || pii.phone || pii.aadhaar),
     },
 
     pii,
@@ -217,5 +215,5 @@ export async function analyzeContent({ title = '', content = '' }) {
     recommendation: getRecommendation(riskLevel),
 
     aiFlagged: Boolean(result.flagged),
-  }
+  };
 }
