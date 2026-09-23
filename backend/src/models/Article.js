@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const articleSchema = new mongoose.Schema({
-  _id: { type: String, required: true }, // custom article slug/id
+  _id: { type: String, required: true },
   title: { type: String, required: true, trim: true },
   excerpt: { type: String, required: true, trim: true },
   body: { type: String, required: true },
@@ -9,10 +9,10 @@ const articleSchema = new mongoose.Schema({
   tags: { type: [String], default: [] },
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   authorName: { type: String, required: true, trim: true },
-  status: { 
-    type: String, 
-    enum: ['Draft', 'Pending', 'Approved', 'Published', 'Rejected', 'Changes Requested'], 
-    default: 'Draft' 
+  status: {
+    type: String,
+    enum: ['Draft', 'Pending', 'Approved', 'Published', 'Rejected', 'Changes Requested'],
+    default: 'Draft'
   },
   coverImage: { type: String },
   readMinutes: { type: Number, default: 0 },
@@ -20,20 +20,41 @@ const articleSchema = new mongoose.Schema({
   likesCount: { type: Number, default: 0, min: 0 },
   publishedAt: { type: Date },
   reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  reviewedAt: { type: Date }
-}, { 
-  timestamps: true, 
+  reviewedAt: { type: Date },
+
+  spamStatus: {
+    type: String,
+    enum: ['Not Checked', 'Clean', 'Flagged', 'Approved', 'Rejected'],
+    default: 'Not Checked'
+  },
+  spamScore: {
+    type: Number,
+    min: 0,
+    max: 1,
+    default: null
+  },
+  spamReasons: {
+    type: [String],
+    default: []
+  },
+  spamReviewedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  spamReviewedAt: {
+    type: Date
+  }
+}, {
+  timestamps: true,
   versionKey: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 });
 
-// Map virtual id to string _id
 articleSchema.virtual('id').get(function() {
   return this._id;
 });
 
-// Text index for full-text search
 articleSchema.index({ title: 'text', excerpt: 'text' });
 
 export default mongoose.model('Article', articleSchema);

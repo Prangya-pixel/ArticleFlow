@@ -12,6 +12,7 @@ import AdminHome from './pages/admin/AdminHome'
 import AdminBrowse from './pages/admin/AdminBrowse'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminProfile from './pages/admin/AdminProfile'
+import SpamApproval from './pages/admin/SpamApproval'
 import ReaderHome from './pages/reader/ReaderHome'
 import ReaderBrowse from './pages/reader/ReaderBrowse'
 import ReaderProfile from './pages/reader/ReaderProfile'
@@ -40,7 +41,10 @@ export default function App() {
           <Route path="create" element={<CreateArticle />} />
           <Route path="edit/:id" element={<CreateArticle />} />
           <Route path="profile" element={<AuthorProfile />} />
-          <Route path="notifications" element={<Notifications role="author" />} />
+          <Route
+            path="notifications"
+            element={<Notifications role="author" />}
+          />
         </Route>
       </Route>
 
@@ -51,8 +55,15 @@ export default function App() {
           <Route path="browse" element={<AdminBrowse />} />
           <Route path="article/:id" element={<ArticleDetail />} />
           <Route path="dashboard" element={<AdminDashboard />} />
+
+          {/* Phase 3 - Spam Content Approval */}
+          <Route path="spam-approval" element={<SpamApproval />} />
+
           <Route path="profile" element={<AdminProfile />} />
-          <Route path="notifications" element={<Notifications role="admin" />} />
+          <Route
+            path="notifications"
+            element={<Notifications role="admin" />}
+          />
         </Route>
       </Route>
 
@@ -63,7 +74,10 @@ export default function App() {
           <Route path="browse" element={<ReaderBrowse />} />
           <Route path="article/:id" element={<ArticleDetail />} />
           <Route path="profile" element={<ReaderProfile />} />
-          <Route path="notifications" element={<Notifications role="reader" />} />
+          <Route
+            path="notifications"
+            element={<Notifications role="reader" />}
+          />
         </Route>
       </Route>
 
