@@ -6,6 +6,9 @@ import Article from '../models/Article.js';
 import Quiz from '../models/Quiz.js';
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
+import {
+  generateArticleEmbedding,
+} from '../services/duplicateDetectionService.js';
 
 const editableFields = ['title', 'excerpt', 'body', 'category', 'coverImage'];
 
@@ -332,12 +335,31 @@ export async function createArticle(req, res, next) {
         message: questionError,
       });
     }
+    const title =
+      req.body.title.trim();
+
+    const excerpt =
+      req.body.excerpt.trim();
+
+    const body =
+      req.body.body.trim();
+    
+    let contentEmbedding;
+
+    if (req.body.submit) {
+      contentEmbedding =
+        await generateArticleEmbedding({
+          title,
+          excerpt,
+          body,
+        });
+    }
 
     const article = await Article.create({
       _id: crypto.randomUUID(),
-      title: req.body.title.trim(),
-      excerpt: req.body.excerpt.trim(),
-      body: req.body.body.trim(),
+      title,
+      excerpt,
+      body,
       category: req.body.category.trim(),
       tags: (req.body.tags || [])
         .map((tag) => tag.trim())
@@ -345,8 +367,11 @@ export async function createArticle(req, res, next) {
       coverImage: req.body.coverImage?.trim(),
       author: req.user._id,
       authorName: req.user.name,
-      readMinutes: readMinutes(req.body.body),
+      readMinutes: readMinutes(body),
       status: req.body.submit ? 'Pending' : 'Draft',
+      ...(contentEmbedding
+        ? { contentEmbedding }
+        : {}),
     });
 
     if (
@@ -412,6 +437,14 @@ export async function updateArticle(req, res, next) {
     }
 
     article.readMinutes = readMinutes(article.body);
+    
+    article.contentEmbedding =
+      await generateArticleEmbedding({
+        title: article.title,
+        excerpt: article.excerpt,
+        body: article.body,
+      });
+    
     article.status = 'Pending';
 
     await article.save();
