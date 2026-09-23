@@ -6,8 +6,10 @@ const items = [
   { label: 'Home', to: '/admin/home' },
   { label: 'Browse', to: '/admin/browse' },
   { label: 'Admin', to: '/admin/dashboard' },
+   { label: 'Moderation', to: '/admin/moderation' },
   { label: 'Notifications', to: '/admin/notifications' },
   { label: 'Profile', to: '/admin/profile' },
+{ label: 'Chat', to: '/chat' },
 ]
 
 export default function AdminLayout() {

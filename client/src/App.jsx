@@ -13,11 +13,14 @@ import AdminBrowse from './pages/admin/AdminBrowse'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminProfile from './pages/admin/AdminProfile'
 import SpamApproval from './pages/admin/SpamApproval'
+import ModerationDashboard from './pages/admin/moderation/ModerationDashboard'
+import ModerationReview from './pages/admin/moderation/ModerationReview'
 import ReaderHome from './pages/reader/ReaderHome'
 import ReaderBrowse from './pages/reader/ReaderBrowse'
 import ReaderProfile from './pages/reader/ReaderProfile'
 import ArticleDetail from './pages/ArticleDetail'
 import NotFound from './pages/NotFound'
+import Chat from './pages/Chat'
 import Notifications from './pages/author/Notifications'
 import ProtectedRoute from './components/common/ProtectedRoute'
 import PublicProfile from './pages/PublicProfile'
@@ -59,6 +62,16 @@ export default function App() {
           {/* Phase 3 - Spam Content Approval */}
           <Route path="spam-approval" element={<SpamApproval />} />
 
+          {/* Phase 3 - AI Content Moderation */}
+          <Route
+            path="moderation"
+            element={<ModerationDashboard />}
+          />
+          <Route
+            path="moderation/:id"
+            element={<ModerationReview />}
+          />
+
           <Route path="profile" element={<AdminProfile />} />
           <Route
             path="notifications"
@@ -79,6 +92,11 @@ export default function App() {
             element={<Notifications role="reader" />}
           />
         </Route>
+      </Route>
+
+      {/* Chat is available to authenticated users */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/chat" element={<Chat />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

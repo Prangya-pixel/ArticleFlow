@@ -20,9 +20,14 @@ export const getPublicProfile = async (req, res, next) => {
       status: 'Published',
     })
       .select(
-        '_id title excerpt category tags authorName coverImage readMinutes views publishedAt createdAt'
+        '_id title excerpt category tags authorName coverImage readMinutes views likesCount publishedAt createdAt'
       )
       .sort({ publishedAt: -1, createdAt: -1 });
+
+    const [followersCount, followingCount] = await Promise.all([
+      Follow.countDocuments({ following: user._id }),
+      Follow.countDocuments({ follower: user._id }),
+    ]);
 
     res.json({
       user: {
@@ -31,8 +36,8 @@ export const getPublicProfile = async (req, res, next) => {
         username: user.username || '',
         bio: user.bio || '',
         profilePhoto: user.profilePhoto || '',
-        followersCount: user.followersCount || 0,
-        followingCount: user.followingCount || 0,
+        followersCount,
+        followingCount,
         role: user.role,
       },
       articles: articles.map((article) => ({
@@ -45,6 +50,7 @@ export const getPublicProfile = async (req, res, next) => {
         coverImage: article.coverImage || '',
         readMinutes: article.readMinutes || 0,
         views: article.views || 0,
+        likesCount: article.likesCount || 0,
         publishedAt: article.publishedAt,
       })),
     });
@@ -89,7 +95,11 @@ export async function toggleFollow(req, res, next) {
         { $inc: { followingCount: -1 } }
       );
 
-      return res.json({ following: false });
+      const [targetFollowersCount, currentFollowingCount] = await Promise.all([
+        Follow.countDocuments({ following: targetId }),
+        Follow.countDocuments({ follower: req.user._id }),
+      ]);
+      return res.json({ following: false, targetFollowersCount, currentFollowingCount });
     }
 
     await Follow.create({
@@ -113,7 +123,11 @@ export async function toggleFollow(req, res, next) {
       message: `${req.user.name} started following you.`,
     });
 
-    return res.json({ following: true });
+    const [targetFollowersCount, currentFollowingCount] = await Promise.all([
+      Follow.countDocuments({ following: targetId }),
+      Follow.countDocuments({ follower: req.user._id }),
+    ]);
+    return res.json({ following: true, targetFollowersCount, currentFollowingCount });
   } catch (error) {
     next(error);
   }
