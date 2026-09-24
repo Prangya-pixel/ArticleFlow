@@ -1,0 +1,253 @@
+.moderation-page {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: 3rem;
+}
+
+.moderation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.moderation-subtitle {
+  margin-top: 0.5rem;
+  color: #6b7280;
+  max-width: 650px;
+}
+
+.moderation-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.moderation-stat-card {
+  padding: 1.25rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.moderation-stat-card span {
+  display: block;
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.moderation-stat-card strong {
+  display: block;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.moderation-stat-card.safe {
+  border-left: 4px solid #22c55e;
+}
+
+.moderation-stat-card.review {
+  border-left: 4px solid #f59e0b;
+}
+
+.moderation-stat-card.blocked {
+  border-left: 4px solid #ef4444;
+}
+
+.moderation-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.moderation-toolbar input,
+.moderation-toolbar select {
+  min-height: 44px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0 0.9rem;
+  font: inherit;
+}
+
+.moderation-toolbar input {
+  flex: 1;
+  min-width: 260px;
+}
+
+.moderation-toolbar select {
+  min-width: 150px;
+}
+
+.moderation-toolbar input:focus,
+.moderation-toolbar select:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+}
+
+.moderation-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  overflow: hidden;
+}
+
+.moderation-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.moderation-section-header h2 {
+  margin: 0.25rem 0 0;
+  font-size: 1.25rem;
+}
+
+.moderation-count {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.moderation-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.moderation-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 850px;
+}
+
+.moderation-table th,
+.moderation-table td {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.moderation-table th {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.moderation-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.moderation-content-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  max-width: 360px;
+}
+
+.moderation-content-cell strong {
+  color: #111827;
+}
+
+.moderation-content-cell span {
+  color: #6b7280;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.risk-badge,
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.risk-badge {
+  min-width: 54px;
+  padding: 0.4rem 0.65rem;
+}
+
+.status-badge {
+  padding: 0.4rem 0.7rem;
+}
+
+.risk-badge.low,
+.status-badge.low {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.risk-badge.medium,
+.status-badge.medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.risk-badge.high,
+.status-badge.high {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.moderation-view-button {
+  display: inline-flex;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.moderation-empty {
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.moderation-empty h3 {
+  margin-bottom: 0.4rem;
+}
+
+.moderation-empty p {
+  color: #6b7280;
+}
+
+@media (max-width: 900px) {
+  .moderation-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .moderation-section-header {
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .moderation-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .moderation-toolbar {
+    flex-direction: column;
+  }
+
+  .moderation-toolbar input,
+  .moderation-toolbar select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .moderation-section-header {
+    flex-direction: column;
+  }
+}
