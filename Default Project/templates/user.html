@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}{{ profile.display_name }} · Trust &amp; Reputation{% endblock %}
+
+{% block content %}
+<p><a href="{{ url_for('dashboard') }}">← Back to dashboard</a></p>
+
+<section class="hero">
+  <div class="user-head">
+    <span class="avatar avatar-lg">{{ profile.display_name[0] | upper }}</span>
+    <div>
+      <h1>{{ profile.display_name }}</h1>
+      <p class="muted">@{{ profile.username }} · member since {{ profile.created_at }}</p>
+      <span class="tier-badge tier-{{ profile.tier.key }}">{{ profile.tier.label }}</span>
+    </div>
+  </div>
+
+  <div class="score-ring">
+    <div class="score-value">{{ profile.score }}</div>
+    <div class="muted">/ {{ profile.score_max }}</div>
+    <div class="bar wide"><div class="bar-fill {{ profile.tier.key }}" style="width: {{ profile.score }}%"></div></div>
+  </div>
+</section>
+
+<section class="grid-3">
+  <div class="stat-card">
+    <div class="stat positive">{{ profile.positive_contributions | length }}</div>
+    <div class="muted">Positive contributions</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat {% if profile.violations %}negative{% endif %}">{{ profile.violations | length }}</div>
+    <div class="muted">Warnings &amp; violations</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat">{{ profile.events | length }}</div>
+    <div class="muted">Total score events</div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Moderation support</h2>
+  <p><strong>{{ profile.tier.label }}</strong> — {{ profile.tier.description }}</p>
+  {% if profile.tier.actions %}
+  <ul>
+    {% for action in profile.tier.actions %}<li>{{ action }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+</section>
+
+<section class="grid-2">
+  <div class="card">
+    <h2>Score history</h2>
+    <p class="muted">Major events affecting your reputation (newest first).</p>
+    <ul class="timeline">
+      {% for e in profile.events %}
+      <li class="timeline-item {{ e.category }}">
+        <span class="points {{ 'positive' if e.points > 0 else 'negative' }}">
+          {{ '%+d' % e.points }}
+        </span>
+        <span>
+          <strong>{{ e.description }}</strong><br>
+          <small class="muted">{{ e.type }} · {{ e.created_at }}</small>
+        </span>
+      </li>
+      {% else %}
+      <li class="muted">No events yet — your score is at its neutral starting value.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>How to improve</h2>
+      <ul class="tips">
+        {% for tip in profile.tips %}<li>{{ tip }}</li>{% endfor %}
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Record an event</h2>
+      <form id="event-form" class="stack-form">
+        <label for="event-type">Activity</label>
+        <select id="event-type">
+          {% for type, (points, category, description) in event_types.items() %}
+          <option value="{{ type }}">
+            {{ description }} ({{ '%+d' % points }})
+          </option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn">Apply to score</button>
+      </form>
+      <p id="event-result" class="muted"></p>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('event-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const type = document.getElementById('event-type').value;
+  const res = await fetch('/api/users/{{ profile.id }}/events', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    document.getElementById('event-result').textContent =
+      `${data.previous_score} → ${data.new_score} (${data.tier.label})`;
+    setTimeout(() => location.reload(), 600);
+  } else {
+    alert(data.error || 'Failed to record event');
+  }
+});
+</script>
+{% endblock %}

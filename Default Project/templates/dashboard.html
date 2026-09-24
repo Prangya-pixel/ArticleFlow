@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Trust &amp; Reputation{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>Community Trust Dashboard</h1>
+    <p class="muted">
+      Every user carries a reputation score from 0–100. New users start at a neutral
+      <strong>{{ default_score }}</strong>. Scores rise with positive contributions and
+      fall with confirmed violations.
+    </p>
+  </div>
+  <div class="legend">
+    <span class="tier-badge tier-normal">Normal review</span>
+    <span class="tier-badge tier-monitor">Additional monitoring</span>
+    <span class="tier-badge tier-restricted">Increased review</span>
+  </div>
+</section>
+
+<section class="card">
+  <div class="card-head">
+    <h2>Users</h2>
+    <form id="new-user-form" class="inline-form">
+      <input id="new-username" type="text" placeholder="username" required>
+      <input id="new-display" type="text" placeholder="display name">
+      <button type="submit" class="btn">Add user</button>
+    </form>
+  </div>
+
+  <table class="users-table">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Score</th>
+        <th class="hide-sm">Contributions</th>
+        <th class="hide-sm">Violations</th>
+        <th>Moderation</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>
+          <a class="user-link" href="{{ url_for('user_page', user_id=u.id) }}">
+            <span class="avatar">{{ u.display_name[0] | upper }}</span>
+            <span>
+              <strong>{{ u.display_name }}</strong><br>
+              <small class="muted">@{{ u.username }}</small>
+            </span>
+          </a>
+        </td>
+        <td>
+          <div class="score-cell">
+            <strong>{{ u.score }}</strong>
+            <div class="bar"><div class="bar-fill {{ u.tier.key }}" style="width: {{ u.score }}%"></div></div>
+          </div>
+        </td>
+        <td class="hide-sm positive">+{{ u.positive_contributions | length }}</td>
+        <td class="hide-sm {% if u.violations %}negative{% endif %}">
+          {% if u.violations %}−{{ u.violations | length }}{% else %}0{% endif %}
+        </td>
+        <td><span class="tier-badge tier-{{ u.tier.key }}">{{ u.tier.label }}</span></td>
+        <td><a class="btn btn-sm" href="{{ url_for('user_page', user_id=u.id) }}">Details</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="muted">No users yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="grid-2">
+  <div class="card">
+    <h2>Score rules</h2>
+    <table class="rules-table">
+      <thead><tr><th>Activity</th><th>Change</th></tr></thead>
+      <tbody>
+        {% for type, (points, category, description) in event_types.items() %}
+        <tr>
+          <td>
+            <strong>{{ description }}</strong><br>
+            <small class="muted">{{ type }}</small>
+          </td>
+          <td class="{{ 'positive' if points > 0 else 'negative' }}">
+            {{ '%+d' % points }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>How moderation uses reputation</h2>
+    <ul class="tier-list">
+      <li><span class="tier-badge tier-normal">High (70–100)</span> → normal moderation review</li>
+      <li><span class="tier-badge tier-monitor">Medium (40–69)</span> → additional monitoring</li>
+      <li><span class="tier-badge tier-restricted">Low + repeated violations</span> → increased review or temporary restrictions</li>
+    </ul>
+    <p class="muted">
+      Reputation is one factor among several — moderators always make the final call.
+    </p>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('new-user-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('new-username').value.trim();
+  const display_name = document.getElementById('new-display').value.trim();
+  if (!username) return;
+  const res = await fetch('/api/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, display_name })
+  });
+  if (res.ok) location.reload();
+  else alert((await res.json()).error || 'Could not create user');
+});
+</script>
+{% endblock %}
