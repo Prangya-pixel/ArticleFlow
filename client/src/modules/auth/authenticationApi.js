@@ -11,7 +11,15 @@ export async function authRequest(path, data, token) {
     },
     ...(data ? { body: JSON.stringify(data) } : {}),
   });
-  const payload = await response.json();
-  if (!response.ok) throw new Error(payload.message || 'Request failed.');
+  const responseText = await response.text();
+  let payload = null;
+  if (responseText.trim()) {
+    try {
+      payload = JSON.parse(responseText);
+    } catch {
+      payload = { message: 'The API returned an invalid response.' };
+    }
+  }
+  if (!response.ok) throw new Error(payload?.message || `Request failed (${response.status}).`);
   return payload;
 }
