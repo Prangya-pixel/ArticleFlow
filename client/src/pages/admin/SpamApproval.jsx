@@ -1,6 +1,7 @@
+
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { verificationService } from '../../services/verificationService'
+import { articleService } from '../../services/articleService'
 
 export default function SpamApproval() {
   const [articles, setArticles] = useState([])
@@ -13,10 +14,12 @@ export default function SpamApproval() {
     setError('')
 
     try {
-      const data = await verificationService.getSpamApprovalQueue()
-      setArticles(data)
+      const data = await articleService.getSpamArticles()
+
+      // Backend returns { articles: [...] }
+      setArticles(data.articles || [])
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'Failed to load spam submissions.')
     } finally {
       setLoading(false)
     }
@@ -26,46 +29,29 @@ export default function SpamApproval() {
     loadArticles()
   }, [])
 
-  const approveSpam = async (id) => {
+  const reviewSpam = async (id, decision) => {
     setActionLoading(id)
     setError('')
 
     try {
-      await verificationService.approveSpamContent(id)
+      await articleService.reviewSpamArticle(id, decision)
 
       setArticles((items) =>
-        items.filter((item) => (item.id || item._id) !== id)
+        items.filter((item) => String(item.id || item._id) !== String(id))
       )
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'Failed to review article.')
     } finally {
       setActionLoading(null)
     }
   }
 
+  const approveSpam = async (id) => {
+    await reviewSpam(id, 'Approved')
+  }
+
   const rejectSpam = async (id) => {
-    const adminNote = window.prompt(
-      'Why is this content being rejected as spam?'
-    )
-
-    if (!adminNote?.trim()) {
-      return
-    }
-
-    setActionLoading(id)
-    setError('')
-
-    try {
-      await verificationService.rejectSpamContent(id, adminNote)
-
-      setArticles((items) =>
-        items.filter((item) => (item.id || item._id) !== id)
-      )
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setActionLoading(null)
-    }
+    await reviewSpam(id, 'Rejected')
   }
 
   return (
@@ -74,7 +60,9 @@ export default function SpamApproval() {
 
       <div className="dashboard-section-heading">
         <div>
-          <h1 className="browse-page-title">Spam review queue.</h1>
+          <h1 className="browse-page-title">
+            Spam review queue.
+          </h1>
 
           <p className="notifications-description">
             Review content flagged by the spam detection system before it
@@ -153,7 +141,7 @@ export default function SpamApproval() {
                     >
                       {isLoading
                         ? 'Processing...'
-                        : 'Approve spam check'}
+                        : 'Approve'}
                     </button>
 
                     <button

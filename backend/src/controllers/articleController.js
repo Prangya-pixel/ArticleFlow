@@ -6,6 +6,7 @@ import Article from '../models/Article.js';
 import Quiz from '../models/Quiz.js';
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
+import { analyzeContent } from '../services/moderationService.js';
 
 const editableFields = ['title', 'excerpt', 'body', 'category', 'coverImage'];
 
@@ -26,8 +27,13 @@ const articleResponse = (article) => {
 
 async function withEngagement(article) {
   const response = articleResponse(article);
+
   response.likesCount = response.likesCount || 0;
-  response.commentsCount = await Comment.countDocuments({ articleId: String(article._id) });
+
+  response.commentsCount = await Comment.countDocuments({
+    articleId: String(article._id),
+  });
+
   return response;
 }
 
@@ -42,6 +48,63 @@ function readMinutes(body) {
     1,
     Math.ceil(body.trim().split(/\s+/).length / 200)
   );
+}
+
+/*
+ * Convert moderation flags into human-readable
+ * spam/content moderation reasons.
+ */
+function getSpamReasons(analysis) {
+  const reasons = [];
+
+  if (analysis.flags?.spam) {
+    reasons.push('Spam or promotional content detected.');
+  }
+
+  if (analysis.flags?.suspiciousLinks) {
+    reasons.push('Suspicious link detected.');
+  }
+
+  if (analysis.flags?.pii) {
+    reasons.push('Potential personal information detected.');
+  }
+
+  if (analysis.flags?.toxic) {
+    reasons.push('Toxic or harassing content detected.');
+  }
+
+  if (analysis.flags?.hateSpeech) {
+    reasons.push('Potential hate speech detected.');
+  }
+
+  if (analysis.flags?.violence) {
+    reasons.push('Potential violent content detected.');
+  }
+
+  if (analysis.flags?.inappropriate) {
+    reasons.push('Potential inappropriate content detected.');
+  }
+
+  return reasons;
+}
+
+/*
+ * Run moderation for submitted article content
+ * and return only the data required by Article.
+ */
+async function analyzeArticleForSpam(title, excerpt, body) {
+  const analysis = await analyzeContent({
+    title,
+    content: `${excerpt}\n${body}`,
+  });
+
+  const reasons = getSpamReasons(analysis);
+
+  return {
+    spamStatus: reasons.length > 0 ? 'Flagged' : 'Clean',
+    spamScore: analysis.riskScore,
+    spamReasons: reasons,
+  };
 }
 
 async function notifyAdminsAboutSubmission(article) {
@@ -122,7 +185,6 @@ export async function getArticle(req, res, next) {
 
     let article;
 
-    // Support both ObjectId and String article IDs
     if (mongoose.Types.ObjectId.isValid(id)) {
       article = await Article.collection.findOne({
         _id: new mongoose.Types.ObjectId(id),
@@ -155,7 +217,6 @@ export async function getArticle(req, res, next) {
       });
     }
 
-    // Only real readers increase the view count
     if (
       article.status === 'Published' &&
       req.user?.role === 'reader'
@@ -176,11 +237,14 @@ export async function getArticle(req, res, next) {
           (savedId) =>
             String(savedId) === String(article._id)
         ) || false;
-
     }
 
     if (req.user) {
-      const existingLike = await Like.findOne({ user: req.user._id, article: article._id });
+      const existingLike = await Like.findOne({
+        user: req.user._id,
+        article: article._id,
+      });
+
       response.isLiked = !!existingLike;
     }
 
@@ -197,8 +261,16 @@ export async function getSavedArticles(req, res, next) {
       status: 'Published',
     }).sort({ publishedAt: -1 });
 
-    const responses = await Promise.all(articles.map(withEngagement));
-    return res.json(responses.map((article) => ({ ...article, isSaved: true })));
+    const responses = await Promise.all(
+      articles.map(withEngagement)
+    );
+
+    return res.json(
+      responses.map((article) => ({
+        ...article,
+        isSaved: true,
+      }))
+    );
   } catch (error) {
     next(error);
   }
@@ -211,7 +283,9 @@ export async function getReviewedArticles(req, res, next) {
       status: { $in: ['Published', 'Rejected'] },
     }).sort({ reviewedAt: -1 });
 
-    return res.json(await Promise.all(articles.map(withEngagement)));
+    return res.json(
+      await Promise.all(articles.map(withEngagement))
+    );
   } catch (error) {
     next(error);
   }
@@ -333,20 +407,53 @@ export async function createArticle(req, res, next) {
       });
     }
 
+    const title = req.body.title.trim();
+    const excerpt = req.body.excerpt.trim();
+    const body = req.body.body.trim();
+
+    let spamData = {
+      spamStatus: 'Not Checked',
+      spamScore: null,
+      spamReasons: [],
+    };
+
+    /*
+     * Only run spam analysis when the author
+     * actually submits the article for review.
+     */
+    if (req.body.submit) {
+      spamData = await analyzeArticleForSpam(
+        title,
+        excerpt,
+        body
+      );
+    }
+
     const article = await Article.create({
       _id: crypto.randomUUID(),
-      title: req.body.title.trim(),
-      excerpt: req.body.excerpt.trim(),
-      body: req.body.body.trim(),
+
+      title,
+      excerpt,
+      body,
+
       category: req.body.category.trim(),
+
       tags: (req.body.tags || [])
         .map((tag) => tag.trim())
         .filter(Boolean),
+
       coverImage: req.body.coverImage?.trim(),
+
       author: req.user._id,
       authorName: req.user.name,
-      readMinutes: readMinutes(req.body.body),
+
+      readMinutes: readMinutes(body),
+
       status: req.body.submit ? 'Pending' : 'Draft',
+
+      spamStatus: spamData.spamStatus,
+      spamScore: spamData.spamScore,
+      spamReasons: spamData.spamReasons,
     });
 
     if (
@@ -363,7 +470,9 @@ export async function createArticle(req, res, next) {
       await notifyAdminsAboutSubmission(article);
     }
 
-    return res.status(201).json(articleResponse(article));
+    return res.status(201).json(
+      articleResponse(article)
+    );
   } catch (error) {
     next(error);
   }
@@ -412,6 +521,26 @@ export async function updateArticle(req, res, next) {
     }
 
     article.readMinutes = readMinutes(article.body);
+
+    /*
+     * Re-run spam analysis when an edited article
+     * is submitted again.
+     */
+    if (req.body.submit) {
+      const spamData = await analyzeArticleForSpam(
+        article.title,
+        article.excerpt,
+        article.body
+      );
+
+      article.spamStatus = spamData.spamStatus;
+      article.spamScore = spamData.spamScore;
+      article.spamReasons = spamData.spamReasons;
+
+      article.spamReviewedBy = undefined;
+      article.spamReviewedAt = undefined;
+    }
+
     article.status = 'Pending';
 
     await article.save();
@@ -429,13 +558,17 @@ export async function updateArticle(req, res, next) {
         });
       }
     }
+
     await notifyAdminsAboutSubmission(article);
 
-    return res.json(articleResponse(article));
+    return res.json(
+      articleResponse(article)
+    );
   } catch (error) {
     next(error);
   }
 }
+
 export async function deleteArticle(req, res, next) {
   try {
     const article = await Article.findOneAndDelete({
@@ -443,15 +576,86 @@ export async function deleteArticle(req, res, next) {
       author: req.user._id,
       status: { $ne: 'Pending' },
     });
+
     if (!article) {
       return res.status(404).json({
         message: 'Article not found or cannot be deleted.',
       });
     }
+
     await Quiz.deleteOne({
       articleId: article._id,
     });
+
     return res.status(204).end();
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getSpamArticles(req, res, next) {
+  try {
+    const articles = await Article.find({
+      spamStatus: { $in: ['Flagged', 'Not Checked'] },
+      status: 'Pending',
+    }).sort({ createdAt: -1 });
+
+    return res.json({
+      articles: await Promise.all(
+        articles.map(withEngagement)
+      ),
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function reviewSpamArticle(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { decision } = req.body;
+
+    if (!['Approved', 'Rejected'].includes(decision)) {
+      return res.status(400).json({
+        message: 'Decision must be Approved or Rejected.',
+      });
+    }
+
+    const article = await Article.findOne({
+      _id: id,
+      status: 'Pending',
+    });
+
+    if (!article) {
+      return res.status(404).json({
+        message: 'Pending article not found.',
+      });
+    }
+
+    article.spamStatus = decision;
+    article.spamReviewedBy = req.user._id;
+    article.spamReviewedAt = new Date();
+
+    if (decision === 'Approved') {
+      article.status = 'Approved';
+    }
+
+    if (decision === 'Rejected') {
+      article.status = 'Rejected';
+    }
+
+    article.reviewedBy = req.user._id;
+    article.reviewedAt = new Date();
+
+    await article.save();
+
+    return res.json({
+      message:
+        decision === 'Approved'
+          ? 'Article approved successfully.'
+          : 'Article rejected successfully.',
+      article: articleResponse(article),
+    });
   } catch (error) {
     next(error);
   }
