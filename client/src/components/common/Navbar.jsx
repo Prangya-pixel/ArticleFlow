@@ -42,7 +42,17 @@ export default function Navbar({ items, role }) {
             to={item.to}
             className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
           >
-            {item.label}{item.label === 'Notifications' && unreadCount > 0 && <span className="notification-nav-count" aria-label={`${unreadCount} unread notifications`}>{unreadCount > 99 ? '99+' : unreadCount}</span>}
+            {item.label}
+            {item.badge !== undefined && item.badge > 0 && (
+              <span className="notification-nav-count badge-amber" aria-label={`${item.badge} pending`}>
+                {item.badge > 99 ? '99+' : item.badge}
+              </span>
+            )}
+            {item.label === 'Notifications' && unreadCount > 0 && !item.badge && (
+              <span className="notification-nav-count" aria-label={`${unreadCount} unread notifications`}>
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>

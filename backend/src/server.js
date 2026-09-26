@@ -8,6 +8,7 @@ import quizRoutes from './routes/quizRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import verificationRoutes from './routes/verificationRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import moderationRoutes from './routes/moderationRoutes.js';
 
 const app = express();
 app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
@@ -19,7 +20,8 @@ app.use('/api/quizzes', quizRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/verification', verificationRoutes);
 app.use('/api/users', userRoutes);
-app.use((error, _req, res, _next) => { console.error(error); res.status(500).json({ message: 'Something went wrong. Please try again.' }); });
+app.use('/api/moderation/approval', moderationRoutes);
+app.use((error, _req, res, _next) => { console.error(error); res.status(error.status || 500).json({ message: error.message || 'Something went wrong. Please try again.' }); });
 
 const port = process.env.PORT || 5000;
 connectDatabase().then(() => app.listen(port, () => console.log(`ArticleFlow API is running on port ${port}`))).catch((error) => { console.error(`Could not start server: ${error.message}`); process.exit(1); });

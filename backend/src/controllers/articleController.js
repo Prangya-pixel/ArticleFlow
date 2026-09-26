@@ -4,6 +4,7 @@ import Article from '../models/Article.js';
 import Quiz from '../models/Quiz.js';
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
+import { approvalService } from '../services/approvalService.js';
 
 const editableFields = ['title', 'excerpt', 'body', 'category', 'coverImage'];
 const articleResponse = (article) => {
@@ -131,7 +132,19 @@ export async function createArticle(req, res, next) {
     if (Array.isArray(req.body.questions) && req.body.questions.length) {
       await Quiz.create({ articleId: article._id, questions: req.body.questions });
     }
-    if (article.status === 'Pending') await notifyAdminsAboutSubmission(article);
+    if (article.status === 'Pending') {
+      try {
+        await approvalService.evaluate(article._id);
+        const updatedDoc = await Article.findById(article._id);
+        if (updatedDoc?.status === 'Pending') {
+          await notifyAdminsAboutSubmission(updatedDoc);
+        }
+        return res.status(201).json(articleResponse(updatedDoc || article));
+      } catch (modErr) {
+        console.error('Smart approval evaluation fallback:', modErr.message);
+        await notifyAdminsAboutSubmission(article);
+      }
+    }
     return res.status(201).json(articleResponse(article));
   } catch (error) { next(error); }
 }
@@ -152,7 +165,17 @@ export async function updateArticle(req, res, next) {
       if (req.body.questions.length) await Quiz.findOneAndUpdate({ articleId: article._id }, { questions: req.body.questions }, { upsert: true });
       else await Quiz.deleteOne({ articleId: article._id });
     }
-    await notifyAdminsAboutSubmission(article);
+    try {
+      await approvalService.evaluate(article._id);
+      const updatedDoc = await Article.findById(article._id);
+      if (updatedDoc?.status === 'Pending') {
+        await notifyAdminsAboutSubmission(updatedDoc);
+      }
+      return res.json(articleResponse(updatedDoc || article));
+    } catch (modErr) {
+      console.error('Smart approval evaluation fallback:', modErr.message);
+      await notifyAdminsAboutSubmission(article);
+    }
     return res.json(articleResponse(article));
   } catch (error) { next(error); }
 }

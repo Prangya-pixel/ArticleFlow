@@ -12,6 +12,8 @@ import AdminHome from './pages/admin/AdminHome'
 import AdminBrowse from './pages/admin/AdminBrowse'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminProfile from './pages/admin/AdminProfile'
+import ModerationQueue from './pages/admin/ModerationQueue'
+import AdminSettings from './pages/admin/AdminSettings'
 import ReaderHome from './pages/reader/ReaderHome'
 import ReaderBrowse from './pages/reader/ReaderBrowse'
 import ReaderProfile from './pages/reader/ReaderProfile'
@@ -47,6 +49,8 @@ export default function App() {
         <Route path="browse" element={<AdminBrowse />} />
         <Route path="article/:id" element={<ArticleDetail />} />
         <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="moderation" element={<ModerationQueue />} />
+        <Route path="settings" element={<AdminSettings />} />
         <Route path="profile" element={<AdminProfile />} />
         <Route path="notifications" element={<Notifications role="admin" />} />
       </Route>

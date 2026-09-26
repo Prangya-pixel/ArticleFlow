@@ -104,9 +104,14 @@ ArticleFlow/
 
 ## Getting started
 
-1. Copy `.env.example` to `.env` and add your MongoDB Atlas connection string and a long JWT secret.
+1. Copy `.env.example` to `.env` and add your MongoDB Atlas connection string and a long JWT secret. The MongoDB username, password, cluster host, and database user must be real values; do not leave the `<...>` placeholders in the URI.
 2. Run `npm run dev` from `backend/` to start the API.
-3. Run `npm run dev` from `frontend/` to start the web app.
+3. Run `npm run dev` from `client/` to start the web app.
+
+If the API prints `bad auth: authentication failed`, the MongoDB connection is
+reaching Atlas but the database credentials are rejected. Reset the Atlas
+database user's password, URL-encode special characters in the password, and
+confirm the current machine's IP address is allowed in Atlas Network Access.
 
 The frontend sends authentication requests to `/api/auth`. Vite proxies these
 requests to `http://localhost:5000` during local development. For a deployed
